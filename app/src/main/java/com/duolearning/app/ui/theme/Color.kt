@@ -2,19 +2,28 @@ package com.duolearning.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Deep black / dark-grey base with green, blue and subtle purple accents.
-val DuoBlack = Color(0xFF0B0D10)
-val DuoSurface = Color(0xFF14171C)
-val DuoSurfaceHigh = Color(0xFF1D2127)
-val DuoBorder = Color(0xFF272C33)
+// Near-black canvas with a violet cast, matching the reference design.
+val DuoBlack = Color(0xFF07070B)
+val DuoSurface = Color(0xFF14141C)
+val DuoSurfaceHigh = Color(0xFF1C1C27)
+val DuoBorder = Color(0xFF2A2A38)
 
-val DuoGreen = Color(0xFF58CC02)
-val DuoGreenDark = Color(0xFF3F9400)
-val DuoBlue = Color(0xFF1CB0F6)
-val DuoPurple = Color(0xFF9B6CFF)
-val DuoRed = Color(0xFFFF4B4B)
-val DuoAmber = Color(0xFFFFC800)
+// Violet -> blue primary ramp.
+val DuoPurple = Color(0xFF7C3AED)
+val DuoPurpleDeep = Color(0xFF4C1D95)
+val DuoIndigo = Color(0xFF5B5BF5)
+val DuoBlue = Color(0xFF3B82F6)
+val DuoCyan = Color(0xFF22D3EE)
 
-val DuoWhite = Color(0xFFF7F7F7)
-val DuoGrey = Color(0xFF9AA0A6)
-val DuoGreyDim = Color(0xFF6B7280)
+// Success / progress.
+val DuoGreen = Color(0xFF4ADE80)
+val DuoGreenDark = Color(0xFF22C55E)
+
+// Streak + alerts.
+val DuoAmber = Color(0xFFFF9F1C)
+val DuoOrange = Color(0xFFFF6B35)
+val DuoRed = Color(0xFFFF5A5F)
+
+val DuoWhite = Color(0xFFF8F8FC)
+val DuoGrey = Color(0xFFA1A1AA)
+val DuoGreyDim = Color(0xFF71717A)

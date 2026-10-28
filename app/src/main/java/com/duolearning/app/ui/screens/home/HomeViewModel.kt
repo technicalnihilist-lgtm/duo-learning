@@ -51,7 +51,10 @@ data class HomeUiState(
     val completedLessons: Int = 0,
     val totalLessons: Int = 0,
     val nextLessonId: String? = null,
-    val units: List<UnitRow> = emptyList()
+    val units: List<UnitRow> = emptyList(),
+    val weekDone: List<Boolean> = emptyList(),
+    val weekLabels: List<String> = emptyList(),
+    val todayIndex: Int = 6
 )
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -83,11 +86,13 @@ class HomeViewModel(
         settings,
         learning.observeXpToday(),
         learning.observeTotalXp(),
-        lessonsFlow
-    ) { s, xpToday, totalXp, lessons ->
+        lessonsFlow,
+        learning.observeDailyActivity()
+    ) { s, xpToday, totalXp, lessons, activity ->
         buildState(
             s.activeCourse, s.nativeLanguage, s.dailyGoalXp,
-            s.currentStreak, s.lastQualifiedDay, xpToday, totalXp, lessons
+            s.currentStreak, s.lastQualifiedDay, xpToday, totalXp, lessons,
+            activity.filter { it.qualified }.map { it.epochDay }.toSet()
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
@@ -99,7 +104,8 @@ class HomeViewModel(
         lastQualifiedDay: Long,
         xpToday: Int,
         totalXp: Int,
-        lessons: List<com.duolearning.app.data.local.entity.LessonProgressEntity>
+        lessons: List<com.duolearning.app.data.local.entity.LessonProgressEntity>,
+        qualifiedDays: Set<Long> = emptySet()
     ): HomeUiState {
         val course: Course? = SeedContent.courseFor(courseCode)
         val today = Dates.todayEpochDay()
@@ -140,7 +146,13 @@ class HomeViewModel(
             completedLessons = completedIds.size,
             totalLessons = orderedIds.size,
             nextLessonId = nextId,
-            units = unitRows
+            units = unitRows,
+            weekDone = (6 downTo 0).map { back -> (today - back) in qualifiedDays },
+            weekLabels = (6 downTo 0).map { back ->
+                com.duolearning.app.domain.Dates.epochDayToLocalDate(today - back)
+                    .dayOfWeek.name.take(1)
+            },
+            todayIndex = 6
         )
     }
 

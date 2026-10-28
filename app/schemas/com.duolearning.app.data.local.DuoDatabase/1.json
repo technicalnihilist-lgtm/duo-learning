@@ -1,0 +1,387 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "d28bf96eca2d190d31439a311247ad89",
+    "entities": [
+      {
+        "tableName": "lesson_progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lessonId` TEXT NOT NULL, `courseCode` TEXT NOT NULL, `completed` INTEGER NOT NULL, `bestScore` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, `lastAttemptAt` INTEGER NOT NULL, PRIMARY KEY(`lessonId`))",
+        "fields": [
+          {
+            "fieldPath": "lessonId",
+            "columnName": "lessonId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseCode",
+            "columnName": "courseCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completed",
+            "columnName": "completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bestScore",
+            "columnName": "bestScore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attempts",
+            "columnName": "attempts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAttemptAt",
+            "columnName": "lastAttemptAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "lessonId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_lesson_progress_courseCode",
+            "unique": false,
+            "columnNames": [
+              "courseCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_lesson_progress_courseCode` ON `${TABLE_NAME}` (`courseCode`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "vocab_progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`vocabId` TEXT NOT NULL, `courseCode` TEXT NOT NULL, `term` TEXT NOT NULL, `translation` TEXT NOT NULL, `exampleTarget` TEXT NOT NULL, `exampleNative` TEXT NOT NULL, `partOfSpeech` TEXT NOT NULL, `easeFactor` REAL NOT NULL, `intervalDays` INTEGER NOT NULL, `repetitions` INTEGER NOT NULL, `dueAt` INTEGER NOT NULL, `lastReviewedAt` INTEGER NOT NULL, `correct` INTEGER NOT NULL, `wrong` INTEGER NOT NULL, `favourite` INTEGER NOT NULL, PRIMARY KEY(`vocabId`))",
+        "fields": [
+          {
+            "fieldPath": "vocabId",
+            "columnName": "vocabId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseCode",
+            "columnName": "courseCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "term",
+            "columnName": "term",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "translation",
+            "columnName": "translation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exampleTarget",
+            "columnName": "exampleTarget",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exampleNative",
+            "columnName": "exampleNative",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "partOfSpeech",
+            "columnName": "partOfSpeech",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "easeFactor",
+            "columnName": "easeFactor",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "intervalDays",
+            "columnName": "intervalDays",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "repetitions",
+            "columnName": "repetitions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dueAt",
+            "columnName": "dueAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastReviewedAt",
+            "columnName": "lastReviewedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "correct",
+            "columnName": "correct",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wrong",
+            "columnName": "wrong",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "favourite",
+            "columnName": "favourite",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "vocabId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_vocab_progress_courseCode",
+            "unique": false,
+            "columnNames": [
+              "courseCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_vocab_progress_courseCode` ON `${TABLE_NAME}` (`courseCode`)"
+          },
+          {
+            "name": "index_vocab_progress_dueAt",
+            "unique": false,
+            "columnNames": [
+              "dueAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_vocab_progress_dueAt` ON `${TABLE_NAME}` (`dueAt`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "saved_translation",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceLang` TEXT NOT NULL, `targetLang` TEXT NOT NULL, `sourceText` TEXT NOT NULL, `targetText` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `favourite` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceLang",
+            "columnName": "sourceLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetLang",
+            "columnName": "targetLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceText",
+            "columnName": "sourceText",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetText",
+            "columnName": "targetText",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "favourite",
+            "columnName": "favourite",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_saved_translation_createdAt",
+            "unique": false,
+            "columnNames": [
+              "createdAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_saved_translation_createdAt` ON `${TABLE_NAME}` (`createdAt`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "translation_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceLang` TEXT NOT NULL, `targetLang` TEXT NOT NULL, `sourceText` TEXT NOT NULL, `targetText` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceLang",
+            "columnName": "sourceLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetLang",
+            "columnName": "targetLang",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceText",
+            "columnName": "sourceText",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetText",
+            "columnName": "targetText",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_translation_history_createdAt",
+            "unique": false,
+            "columnNames": [
+              "createdAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_translation_history_createdAt` ON `${TABLE_NAME}` (`createdAt`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "daily_activity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`epochDay` INTEGER NOT NULL, `xpEarned` INTEGER NOT NULL, `lessonsCompleted` INTEGER NOT NULL, `qualified` INTEGER NOT NULL, PRIMARY KEY(`epochDay`))",
+        "fields": [
+          {
+            "fieldPath": "epochDay",
+            "columnName": "epochDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xpEarned",
+            "columnName": "xpEarned",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lessonsCompleted",
+            "columnName": "lessonsCompleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qualified",
+            "columnName": "qualified",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "epochDay"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "achievement",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `unlockedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unlockedAt",
+            "columnName": "unlockedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd28bf96eca2d190d31439a311247ad89')"
+    ]
+  }
+}

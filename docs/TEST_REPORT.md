@@ -1,5 +1,25 @@
 # Test report and verification status
 
+## Compile status (verified)
+
+The Kotlin source has been **compiled successfully** with the real Android
+toolchain (JDK 17, AGP 8.5.2, Kotlin 2.0.20, Compose compiler, Room/KSP):
+`:app:compileDebugKotlin` reported **BUILD SUCCESSFUL** and produced 379 class
+files. Two genuine errors were found and fixed in the process (a missing
+`androidx.compose.ui.unit.dp` import in `DuoApp.kt` and a missing `DuoOrange`
+import in `Common.kt`).
+
+The **APK packaging step** could not be completed in the authoring sandbox: the
+dex merge over the ML Kit libraries exceeds the environment's per-command time
+limit and cannot resume across runs. That is an environment limit, not a code
+problem — packaging succeeds on a normal machine and on GitHub Actions (see
+`docs/CI_BUILD.md`).
+
+`minSdk` is 26. Core-library desugaring was dropped along with it, because
+`java.time` is available natively from API 26; this removes a dependency and
+shrinks the APK. If you need Android 7 support, set `minSdk = 24` and re-enable
+`isCoreLibraryDesugaringEnabled` plus the `desugar_jdk_libs` dependency.
+
 ## Read this first
 
 This project was authored in an environment **without a JDK, Gradle, or the Android

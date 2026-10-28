@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.duolearning.app"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
@@ -37,19 +37,8 @@ android {
         }
     }
 
-    // Ship only the ABIs we actually need. ML Kit native libs are the largest
-    // contributor to APK size; per-ABI splits keep each download small.
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86_64")
-            isUniversalApk = true
-        }
-    }
 
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -77,8 +66,6 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
     implementation(composeBom)
     androidTestImplementation(composeBom)
-
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.activity:activity-compose:1.9.2")

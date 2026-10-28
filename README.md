@@ -41,6 +41,22 @@ totals for XP / lessons / words.
 **Settings** — daily goal, speech rate, sound, text scale, offline language-pack
 management, history controls, and a confirmed full-progress reset.
 
+## Design previews
+
+![Learn screen](docs/screenshots/mockup-learn.png)
+![Translate screen](docs/screenshots/mockup-translate.png)
+![Practice screen](docs/screenshots/mockup-practice.png)
+![Progress screen](docs/screenshots/mockup-progress.png)
+
+> These are **design mockups rendered from the app's design tokens**, not screenshots
+> from a running build — see `docs/screenshots/README.md`. Replace them with real
+> captures after your first build.
+
+## Get a ready-built APK
+
+Push this repo to GitHub and the included workflow builds an installable APK for
+you on GitHub's runners — no local Android SDK required. See `docs/CI_BUILD.md`.
+
 ## Quick start
 
 1. Open the project folder in Android Studio (Ladybug or newer).

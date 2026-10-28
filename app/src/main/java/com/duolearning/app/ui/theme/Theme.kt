@@ -6,14 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DuoDarkColors = darkColorScheme(
-    primary = DuoGreen,
-    onPrimary = Color(0xFF06210A),
-    primaryContainer = DuoGreenDark,
+    primary = DuoPurple,
+    onPrimary = Color.White,
+    primaryContainer = DuoPurpleDeep,
     onPrimaryContainer = DuoWhite,
     secondary = DuoBlue,
-    onSecondary = Color(0xFF04222F),
-    tertiary = DuoPurple,
-    onTertiary = Color(0xFF1A1030),
+    onSecondary = Color.White,
+    tertiary = DuoCyan,
+    onTertiary = Color(0xFF06202A),
     background = DuoBlack,
     onBackground = DuoWhite,
     surface = DuoSurface,
@@ -22,13 +22,12 @@ private val DuoDarkColors = darkColorScheme(
     onSurfaceVariant = DuoGrey,
     outline = DuoBorder,
     error = DuoRed,
-    onError = DuoWhite
+    onError = Color.White
 )
 
 /**
- * Duo Learning is dark by default. A light scheme is intentionally not
- * provided: the product spec fixes the dark theme as the default look, and
- * offering a light theme would add visual surface area without a user benefit.
+ * Duo Learning is dark by default and uses a violet/blue gradient identity.
+ * A light scheme is intentionally not provided.
  */
 @Composable
 fun DuoLearningTheme(
