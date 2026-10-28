@@ -42,20 +42,24 @@ jobs:
             adb shell settings put global hide_error_dialogs 1
             adb shell settings put secure anr_show_background 0
 
-            # Slow emulators raise a "System UI isn't responding" dialog during
-            # boot. Dismiss it (BACK), then relaunch so the app is foreground.
-            adb shell input keyevent 4 || true
-            sleep 3
-            adb shell input keyevent 4 || true
-            sleep 3
-
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             adb shell am start -W -n com.duolearning.app.debug/com.duolearning.app.MainActivity
-            sleep 15
-            adb shell input keyevent 4 || true
-            sleep 3
-            adb shell am start -W -n com.duolearning.app.debug/com.duolearning.app.MainActivity
-            sleep 15
+            sleep 20
+
+            # Only dismiss if an "isn't responding" dialog is actually present,
+            # so we never send BACK while the app itself is in front.
+            dismiss_anr() {
+              adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 || return 0
+              if adb shell cat /sdcard/ui.xml 2>/dev/null | grep -qi "responding"; then
+                echo "ANR dialog found - dismissing"
+                adb shell input keyevent 4
+                sleep 3
+                adb shell am start -W -n com.duolearning.app.debug/com.duolearning.app.MainActivity
+                sleep 8
+              fi
+            }
+
+            dismiss_anr
 
             SIZE=$(adb shell wm size | tr -d '\r' | sed 's/.*: //')
             W=${SIZE%x*}
@@ -70,12 +74,15 @@ jobs:
             adb exec-out screencap -p > docs/screenshots/app-learn.png
 
             adb shell input tap $X2 $Y; sleep 6
+            dismiss_anr
             adb exec-out screencap -p > docs/screenshots/app-translate.png
 
             adb shell input tap $X3 $Y; sleep 6
+            dismiss_anr
             adb exec-out screencap -p > docs/screenshots/app-practice.png
 
             adb shell input tap $X4 $Y; sleep 6
+            dismiss_anr
             adb exec-out screencap -p > docs/screenshots/app-progress.png
 
             ls -l docs/screenshots/app-*.png
