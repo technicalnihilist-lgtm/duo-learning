@@ -37,13 +37,12 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-snapshot -no-boot-anim -gpu swiftshader_indirect
+          emulator-boot-timeout: 900
           script: |
-            # Suppress the "System UI isn't responding" / ANR dialogs that slow
-            # emulators raise; they would otherwise cover the app in screenshots.
+            # Suppress the "System UI isn't responding" dialogs that slow
+            # emulators raise; they would otherwise cover the app.
             adb shell settings put global hide_error_dialogs 1
             adb shell settings put secure anr_show_background 0
-            adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS || true
 
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             adb shell am start -W -n com.duolearning.app.debug/com.duolearning.app.MainActivity
