@@ -37,10 +37,18 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
+          emulator-options: -no-snapshot -no-boot-anim -gpu swiftshader_indirect
           script: |
+            # Suppress the "System UI isn't responding" / ANR dialogs that slow
+            # emulators raise; they would otherwise cover the app in screenshots.
+            adb shell settings put global hide_error_dialogs 1
+            adb shell settings put secure anr_show_background 0
+            adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS || true
+
             adb install -r app/build/outputs/apk/debug/app-debug.apk
-            adb shell am start -n com.duolearning.app.debug/com.duolearning.app.MainActivity
-            sleep 10
+            adb shell am start -W -n com.duolearning.app.debug/com.duolearning.app.MainActivity
+            sleep 20
+
             SIZE=$(adb shell wm size | tr -d '\r' | sed 's/.*: //')
             W=${SIZE%x*}
             H=${SIZE#*x}
@@ -49,14 +57,19 @@ jobs:
             X2=$(( W * 38 / 100 ))
             X3=$(( W * 62 / 100 ))
             X4=$(( W * 86 / 100 ))
+
             mkdir -p docs/screenshots
             adb exec-out screencap -p > docs/screenshots/app-learn.png
-            adb shell input tap $X2 $Y; sleep 4
+
+            adb shell input tap $X2 $Y; sleep 6
             adb exec-out screencap -p > docs/screenshots/app-translate.png
-            adb shell input tap $X3 $Y; sleep 4
+
+            adb shell input tap $X3 $Y; sleep 6
             adb exec-out screencap -p > docs/screenshots/app-practice.png
-            adb shell input tap $X4 $Y; sleep 4
+
+            adb shell input tap $X4 $Y; sleep 6
             adb exec-out screencap -p > docs/screenshots/app-progress.png
+
             ls -l docs/screenshots/app-*.png
 
       - name: Commit screenshots
@@ -64,5 +77,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/screenshots/app-*.png
-          git commit -m "Add real app screenshots captured on an emulator" || echo "no changes"
+          git commit -m "Update real app screenshots captured on an emulator" || echo "no changes"
           git push
