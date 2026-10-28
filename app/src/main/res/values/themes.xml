@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Dark-first theme. The app is dark by default and does not follow the
+         system light theme. -->
+    <style name="Theme.DuoLearning" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/duo_black</item>
+        <item name="android:navigationBarColor">@color/duo_black</item>
+        <item name="android:windowBackground">@color/duo_black</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+    </style>
+</resources>

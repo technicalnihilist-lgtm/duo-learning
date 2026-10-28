@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Duo Learning</string>
+    <string name="nav_learn">Learn</string>
+    <string name="nav_translate">Translate</string>
+    <string name="nav_practice">Practice</string>
+    <string name="nav_progress">Progress</string>
+    <string name="streak_label">day streak</string>
+    <string name="continue_learning">Continue learning</string>
+    <string name="translate_action">Translate</string>
+    <string name="copy">Copy</string>
+    <string name="share">Share</string>
+    <string name="clear">Clear</string>
+    <string name="paste">Paste</string>
+    <string name="swap">Swap</string>
+    <string name="check">Check</string>
+    <string name="settings">Settings</string>
+</resources>

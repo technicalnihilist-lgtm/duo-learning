@@ -1,0 +1,9 @@
+<resources>
+    <color name="duo_black">#FF0B0D10</color>
+    <color name="duo_surface">#FF14171C</color>
+    <color name="duo_green">#FF58CC02</color>
+    <color name="duo_blue">#FF1CB0F6</color>
+    <color name="duo_purple">#FF9B6CFF</color>
+    <color name="duo_white">#FFF7F7F7</color>
+    <color name="duo_grey">#FF9AA0A6</color>
+</resources>
