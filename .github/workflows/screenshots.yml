@@ -39,14 +39,23 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           script: |
-            # Suppress the "System UI isn't responding" dialogs that slow
-            # emulators raise; they would otherwise cover the app.
             adb shell settings put global hide_error_dialogs 1
             adb shell settings put secure anr_show_background 0
 
+            # Slow emulators raise a "System UI isn't responding" dialog during
+            # boot. Dismiss it (BACK), then relaunch so the app is foreground.
+            adb shell input keyevent 4 || true
+            sleep 3
+            adb shell input keyevent 4 || true
+            sleep 3
+
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             adb shell am start -W -n com.duolearning.app.debug/com.duolearning.app.MainActivity
-            sleep 20
+            sleep 15
+            adb shell input keyevent 4 || true
+            sleep 3
+            adb shell am start -W -n com.duolearning.app.debug/com.duolearning.app.MainActivity
+            sleep 15
 
             SIZE=$(adb shell wm size | tr -d '\r' | sed 's/.*: //')
             W=${SIZE%x*}
