@@ -54,7 +54,10 @@ data class HomeUiState(
     val units: List<UnitRow> = emptyList(),
     val weekDone: List<Boolean> = emptyList(),
     val weekLabels: List<String> = emptyList(),
-    val todayIndex: Int = 6
+    val todayIndex: Int = 6,
+    val depthEffect: Boolean = true,
+    val parallax: Boolean = true,
+    val effectStrength: Float = 0.6f
 )
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -92,7 +95,8 @@ class HomeViewModel(
         buildState(
             s.activeCourse, s.nativeLanguage, s.dailyGoalXp,
             s.currentStreak, s.lastQualifiedDay, xpToday, totalXp, lessons,
-            activity.filter { it.qualified }.map { it.epochDay }.toSet()
+            activity.filter { it.qualified }.map { it.epochDay }.toSet(),
+            s.depthEffect, s.parallax, s.effectStrength
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
@@ -105,7 +109,10 @@ class HomeViewModel(
         xpToday: Int,
         totalXp: Int,
         lessons: List<com.duolearning.app.data.local.entity.LessonProgressEntity>,
-        qualifiedDays: Set<Long> = emptySet()
+        qualifiedDays: Set<Long> = emptySet(),
+        depthEffect: Boolean = true,
+        parallax: Boolean = true,
+        effectStrength: Float = 0.6f
     ): HomeUiState {
         val course: Course? = SeedContent.courseFor(courseCode)
         val today = Dates.todayEpochDay()
@@ -152,7 +159,10 @@ class HomeViewModel(
                 com.duolearning.app.domain.Dates.epochDayToLocalDate(today - back)
                     .dayOfWeek.name.take(1)
             },
-            todayIndex = 6
+            todayIndex = 6,
+            depthEffect = depthEffect,
+            parallax = parallax,
+            effectStrength = effectStrength
         )
     }
 

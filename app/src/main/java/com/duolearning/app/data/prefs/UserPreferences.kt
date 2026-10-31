@@ -26,7 +26,10 @@ data class UserSettings(
     /** Local epoch-day of the last qualifying learning activity, or -1. */
     val lastQualifiedDay: Long = -1L,
     val onboarded: Boolean = false,
-    val textScale: Float = 1.0f
+    val textScale: Float = 1.0f,
+    val depthEffect: Boolean = true,
+    val parallax: Boolean = true,
+    val effectStrength: Float = 0.6f
 )
 
 /**
@@ -47,6 +50,9 @@ class UserPreferences(private val context: Context) {
         val lastDay = longPreferencesKey("last_qualified_day")
         val onboarded = booleanPreferencesKey("onboarded")
         val textScale = floatPreferencesKey("text_scale")
+        val depth = booleanPreferencesKey("depth_effect")
+        val parallax = booleanPreferencesKey("parallax")
+        val strength = floatPreferencesKey("effect_strength")
     }
 
     val settings: Flow<UserSettings> = context.dataStore.data.map { p ->
@@ -60,7 +66,10 @@ class UserPreferences(private val context: Context) {
             longestStreak = p[Keys.longest] ?: 0,
             lastQualifiedDay = p[Keys.lastDay] ?: -1L,
             onboarded = p[Keys.onboarded] ?: false,
-            textScale = p[Keys.textScale] ?: 1.0f
+            textScale = p[Keys.textScale] ?: 1.0f,
+            depthEffect = p[Keys.depth] ?: true,
+            parallax = p[Keys.parallax] ?: true,
+            effectStrength = p[Keys.strength] ?: 0.6f
         )
     }
 
@@ -70,6 +79,9 @@ class UserPreferences(private val context: Context) {
     suspend fun setSpeechRate(rate: Float) = edit { it[Keys.rate] = rate.coerceIn(0.5f, 2.0f) }
     suspend fun setSoundEnabled(on: Boolean) = edit { it[Keys.sound] = on }
     suspend fun setTextScale(scale: Float) = edit { it[Keys.textScale] = scale.coerceIn(0.85f, 1.5f) }
+    suspend fun setDepthEffect(on: Boolean) = edit { it[Keys.depth] = on }
+    suspend fun setParallax(on: Boolean) = edit { it[Keys.parallax] = on }
+    suspend fun setEffectStrength(v: Float) = edit { it[Keys.strength] = v.coerceIn(0f, 1f) }
     suspend fun setOnboarded(done: Boolean) = edit { it[Keys.onboarded] = done }
 
     suspend fun setStreak(current: Int, longest: Int, lastQualifiedDay: Long) = edit {

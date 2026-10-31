@@ -43,6 +43,9 @@ class SettingsViewModel(
     fun setSpeechRate(rate: Float) = viewModelScope.launch { prefs.setSpeechRate(rate) }
     fun setSound(on: Boolean) = viewModelScope.launch { prefs.setSoundEnabled(on) }
     fun setTextScale(scale: Float) = viewModelScope.launch { prefs.setTextScale(scale) }
+    fun setDepthEffect(on: Boolean) = viewModelScope.launch { prefs.setDepthEffect(on) }
+    fun setParallax(on: Boolean) = viewModelScope.launch { prefs.setParallax(on) }
+    fun setEffectStrength(v: Float) = viewModelScope.launch { prefs.setEffectStrength(v) }
 
     fun resetProgress(onDone: () -> Unit) = viewModelScope.launch {
         learning.resetProgress()
