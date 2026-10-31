@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,10 +35,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -70,11 +76,22 @@ fun HomeScreen(
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
 
+    // Scroll drives both effects. Cheap integer reads, no continuous animation.
+    val listState = rememberLazyListState()
+    val scroll by remember {
+        derivedStateOf { listState.firstVisibleItemIndex * 700 + listState.firstVisibleItemScrollOffset }
+    }
+    val parallaxY = if (state.parallax) -(scroll.toFloat() * 0.22f) else 0f
+    val tilt = if (state.depthEffect) {
+        ((scroll.toFloat() / 55f).coerceIn(-9f, 9f) * state.effectStrength)
+    } else 0f
+
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // Soft violet/blue glows behind the content, drawn once and cheap.
         Box(
             Modifier
                 .fillMaxWidth()
+                .offset { IntOffset(0, parallaxY.toInt()) }
                 .height(420.dp)
                 .background(
                     Brush.radialGradient(
@@ -85,6 +102,7 @@ fun HomeScreen(
         )
 
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -110,7 +128,7 @@ fun HomeScreen(
             item { DailyGoalCard(state) }
 
             item {
-                ContinueLearningCard(state) {
+                ContinueLearningCard(state, tilt) {
                     state.nextLessonId?.let { onStartLesson(state.courseCode, it) }
                 }
             }
@@ -278,7 +296,7 @@ private fun DailyGoalCard(state: HomeUiState) {
 }
 
 @Composable
-private fun ContinueLearningCard(state: HomeUiState, onStart: () -> Unit) {
+private fun ContinueLearningCard(state: HomeUiState, tilt: Float, onStart: () -> Unit) {
     val unit = state.units.firstOrNull { u -> u.lessons.any { it.id == state.nextLessonId } }
     val lesson = unit?.lessons?.firstOrNull { it.id == state.nextLessonId }
     val done = state.units.sumOf { u -> u.lessons.count { it.completed } }
@@ -295,6 +313,10 @@ private fun ContinueLearningCard(state: HomeUiState, onStart: () -> Unit) {
                 )
             )
             .border(1.dp, Color.White.copy(alpha = 0.18f), shape)
+            .graphicsLayer {
+                rotationX = tilt
+                cameraDistance = 16f * density
+            }
             .padding(18.dp)
     ) {
         Column {

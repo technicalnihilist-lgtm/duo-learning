@@ -119,6 +119,43 @@ fun SettingsScreen(
             }
         }
 
+        item { SectionHeader("Motion and depth") }
+        item {
+            DuoCard(Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("4D depth effect", color = MaterialTheme.colorScheme.onBackground)
+                        Text(
+                            "Subtle 3D tilt on cards as you scroll",
+                            style = MaterialTheme.typography.labelSmall, color = DuoGrey
+                        )
+                    }
+                    Switch(checked = settings.depthEffect, onCheckedChange = vm::setDepthEffect)
+                }
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Parallax", color = MaterialTheme.colorScheme.onBackground)
+                        Text(
+                            "Background glow follows your scroll",
+                            style = MaterialTheme.typography.labelSmall, color = DuoGrey
+                        )
+                    }
+                    Switch(checked = settings.parallax, onCheckedChange = vm::setParallax)
+                }
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "Effect strength: ${(settings.effectStrength * 100).toInt()}%",
+                    style = MaterialTheme.typography.bodyMedium, color = DuoGrey
+                )
+                Slider(
+                    value = settings.effectStrength,
+                    onValueChange = vm::setEffectStrength,
+                    valueRange = 0f..1f
+                )
+            }
+        }
+
         item { SectionHeader("Accessibility") }
         item {
             DuoCard(Modifier.fillMaxWidth()) {
