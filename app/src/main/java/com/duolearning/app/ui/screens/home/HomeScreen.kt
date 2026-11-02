@@ -88,6 +88,7 @@ fun HomeScreen(
         derivedStateOf { listState.firstVisibleItemIndex * 700 + listState.firstVisibleItemScrollOffset }
     }
     val parallaxY = if (state.parallax) -(scroll.toFloat() * 0.22f) else 0f
+    val fx by vm.fx.collectAsStateWithLifecycle()
     var showFx by remember { mutableStateOf(false) }
     val tilt = if (state.depthEffect) {
         ((scroll.toFloat() / 55f).coerceIn(-9f, 9f) * state.effectStrength)
@@ -110,9 +111,9 @@ fun HomeScreen(
 
         AmbientBlobs(
             modifier = Modifier.fillMaxSize(),
-            shift = if (state.parallax) scroll.toFloat() else 0f,
-            intensity = (state.depthPct / 100f).coerceIn(0f, 2f),
-            blurRadius = (if (state.glassEffect) state.blurPx else 0f).dp
+            shift = if (fx.parallax) scroll.toFloat() else 0f,
+            intensity = (fx.depthPct / 100f).coerceIn(0f, 2f),
+            blurRadius = (if (fx.glassEffect) fx.blurPx else 0f).dp
         )
 
         LazyColumn(
@@ -211,7 +212,7 @@ fun HomeScreen(
 
     if (showFx) {
         FxSheet(
-            settings = state.toSettings(),
+            settings = fx,
             onGlass = vm::setGlass,
             onAnimations = vm::setAnimations,
             onBlur = vm::setBlur,

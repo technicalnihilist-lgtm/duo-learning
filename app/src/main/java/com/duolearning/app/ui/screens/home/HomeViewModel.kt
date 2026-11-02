@@ -166,6 +166,14 @@ class HomeViewModel(
         )
     }
 
+    /** Live effect settings, collected by the effects sheet. */
+    val fx: StateFlow<com.duolearning.app.data.prefs.UserSettings> =
+        learning.settings.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            com.duolearning.app.data.prefs.UserSettings()
+        )
+
     fun setGlass(on: Boolean) = viewModelScope.launch { prefs.setGlassEffect(on) }
     fun setAnimations(on: Boolean) = viewModelScope.launch { prefs.setAnimationsEnabled(on) }
     fun setBlur(v: Float) = viewModelScope.launch { prefs.setBlurPx(v) }
