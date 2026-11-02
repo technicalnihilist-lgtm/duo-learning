@@ -29,7 +29,14 @@ data class UserSettings(
     val textScale: Float = 1.0f,
     val depthEffect: Boolean = true,
     val parallax: Boolean = true,
-    val effectStrength: Float = 0.6f
+    val effectStrength: Float = 0.6f,
+    val glassEffect: Boolean = true,
+    val animationsEnabled: Boolean = true,
+    val blurPx: Float = 16f,
+    val transparencyPct: Float = 26f,
+    val depthPct: Float = 100f,
+    val bouncePct: Float = 100f,
+    val speedPct: Float = 100f
 )
 
 /**
@@ -53,6 +60,13 @@ class UserPreferences(private val context: Context) {
         val depth = booleanPreferencesKey("depth_effect")
         val parallax = booleanPreferencesKey("parallax")
         val strength = floatPreferencesKey("effect_strength")
+        val glass = booleanPreferencesKey("fx_glass")
+        val anims = booleanPreferencesKey("fx_animations")
+        val blur = floatPreferencesKey("fx_blur")
+        val transparency = floatPreferencesKey("fx_transparency")
+        val depthPct = floatPreferencesKey("fx_depth")
+        val bounce = floatPreferencesKey("fx_bounce")
+        val speed = floatPreferencesKey("fx_speed")
     }
 
     val settings: Flow<UserSettings> = context.dataStore.data.map { p ->
@@ -69,7 +83,14 @@ class UserPreferences(private val context: Context) {
             textScale = p[Keys.textScale] ?: 1.0f,
             depthEffect = p[Keys.depth] ?: true,
             parallax = p[Keys.parallax] ?: true,
-            effectStrength = p[Keys.strength] ?: 0.6f
+            effectStrength = p[Keys.strength] ?: 0.6f,
+            glassEffect = p[Keys.glass] ?: true,
+            animationsEnabled = p[Keys.anims] ?: true,
+            blurPx = p[Keys.blur] ?: 16f,
+            transparencyPct = p[Keys.transparency] ?: 26f,
+            depthPct = p[Keys.depthPct] ?: 100f,
+            bouncePct = p[Keys.bounce] ?: 100f,
+            speedPct = p[Keys.speed] ?: 100f
         )
     }
 
@@ -82,6 +103,24 @@ class UserPreferences(private val context: Context) {
     suspend fun setDepthEffect(on: Boolean) = edit { it[Keys.depth] = on }
     suspend fun setParallax(on: Boolean) = edit { it[Keys.parallax] = on }
     suspend fun setEffectStrength(v: Float) = edit { it[Keys.strength] = v.coerceIn(0f, 1f) }
+    suspend fun setGlassEffect(on: Boolean) = edit { it[Keys.glass] = on }
+    suspend fun setAnimationsEnabled(on: Boolean) = edit { it[Keys.anims] = on }
+    suspend fun setBlurPx(v: Float) = edit { it[Keys.blur] = v.coerceIn(0f, 40f) }
+    suspend fun setTransparencyPct(v: Float) = edit { it[Keys.transparency] = v.coerceIn(4f, 30f) }
+    suspend fun setDepthPct(v: Float) = edit { it[Keys.depthPct] = v.coerceIn(0f, 200f) }
+    suspend fun setBouncePct(v: Float) = edit { it[Keys.bounce] = v.coerceIn(0f, 200f) }
+    suspend fun setSpeedPct(v: Float) = edit { it[Keys.speed] = v.coerceIn(50f, 200f) }
+
+    /** Restore every visual effect to its default. */
+    suspend fun resetEffects() = edit {
+        it[Keys.glass] = true
+        it[Keys.anims] = true
+        it[Keys.blur] = 16f
+        it[Keys.transparency] = 26f
+        it[Keys.depthPct] = 100f
+        it[Keys.bounce] = 100f
+        it[Keys.speed] = 100f
+    }
     suspend fun setOnboarded(done: Boolean) = edit { it[Keys.onboarded] = done }
 
     suspend fun setStreak(current: Int, longest: Int, lastQualifiedDay: Long) = edit {
