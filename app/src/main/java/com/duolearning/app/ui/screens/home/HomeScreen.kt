@@ -37,11 +37,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -50,7 +54,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.duolearning.app.ui.components.AmbientBlobs
 import com.duolearning.app.ui.components.DuoLogo
+import com.duolearning.app.ui.components.FxSheet
 import com.duolearning.app.ui.components.GlassCard
 import com.duolearning.app.ui.components.SectionHeader
 import com.duolearning.app.ui.components.StatChip
@@ -82,6 +88,7 @@ fun HomeScreen(
         derivedStateOf { listState.firstVisibleItemIndex * 700 + listState.firstVisibleItemScrollOffset }
     }
     val parallaxY = if (state.parallax) -(scroll.toFloat() * 0.22f) else 0f
+    var showFx by remember { mutableStateOf(false) }
     val tilt = if (state.depthEffect) {
         ((scroll.toFloat() / 55f).coerceIn(-9f, 9f) * state.effectStrength)
     } else 0f
@@ -101,13 +108,20 @@ fun HomeScreen(
                 )
         )
 
+        AmbientBlobs(
+            modifier = Modifier.fillMaxSize(),
+            shift = if (state.parallax) scroll.toFloat() else 0f,
+            intensity = (state.depthPct / 100f).coerceIn(0f, 2f),
+            blurRadius = (if (state.glassEffect) state.blurPx else 0f).dp
+        )
+
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            item { HeaderBar(state, onOpenSettings) }
+            item { HeaderBar(state) { showFx = true } }
 
             item {
                 Text(
@@ -193,6 +207,21 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    if (showFx) {
+        FxSheet(
+            settings = state.toSettings(),
+            onGlass = vm::setGlass,
+            onAnimations = vm::setAnimations,
+            onBlur = vm::setBlur,
+            onTransparency = vm::setTransparency,
+            onDepth = vm::setDepth,
+            onBounce = vm::setBounce,
+            onSpeed = vm::setSpeed,
+            onReset = vm::resetEffects,
+            onDismiss = { showFx = false }
+        )
     }
 }
 

@@ -166,6 +166,15 @@ class HomeViewModel(
         )
     }
 
+    fun setGlass(on: Boolean) = viewModelScope.launch { prefs.setGlassEffect(on) }
+    fun setAnimations(on: Boolean) = viewModelScope.launch { prefs.setAnimationsEnabled(on) }
+    fun setBlur(v: Float) = viewModelScope.launch { prefs.setBlurPx(v) }
+    fun setTransparency(v: Float) = viewModelScope.launch { prefs.setTransparencyPct(v) }
+    fun setDepth(v: Float) = viewModelScope.launch { prefs.setDepthPct(v) }
+    fun setBounce(v: Float) = viewModelScope.launch { prefs.setBouncePct(v) }
+    fun setSpeed(v: Float) = viewModelScope.launch { prefs.setSpeedPct(v) }
+    fun resetEffects() = viewModelScope.launch { prefs.resetEffects() }
+
     companion object {
         val Factory = duoFactory { c ->
             HomeViewModel(c.learningRepository, c.preferences, c.selectionBus)
