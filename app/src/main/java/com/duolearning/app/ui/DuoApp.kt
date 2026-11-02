@@ -173,7 +173,7 @@ private fun DuoBottomBar(nav: NavHostController, currentRoute: String?) {
         val tabW = maxWidth / tabs.size
         val idx = tabs.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
         val fx by LocalContainer.current.preferences.settings
-            .collectAsStateWithLifecycle(initial = UserSettings())
+            .collectAsStateWithLifecycle(initialValue = UserSettings())
         // Speed and Bounce from the effects sheet drive this animation.
         val lensSpec = if (!fx.animationsEnabled) {
             snap()
