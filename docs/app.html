@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Duo Learning</title>
+<meta name="theme-color" content="#07070B">
+<style>
+:root{
+  --bg:#07070B; --surface:#14141C; --high:#1C1C27; --border:#2A2A38;
+  --purple:#7C3AED; --purple-deep:#4C1D95; --indigo:#5B5BF5; --blue:#3B82F6; --cyan:#22D3EE;
+  --green:#4ADE80; --amber:#FF9F1C; --orange:#FF6B35;
+  --text:#F8F8FC; --grey:#A1A1AA; --dim:#71717A;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:#050508;font-family:var(--sans);color:var(--text);
+  display:flex;align-items:center;justify-content:center;padding:22px;
+}
+/* phone shell */
+.phone{
+  position:relative;width:400px;height:860px;max-height:calc(100vh - 44px);
+  background:var(--bg);border-radius:38px;overflow:hidden;
+  border:1px solid #23232E;box-shadow:0 40px 90px -30px rgba(0,0,0,.9);
+  display:flex;flex-direction:column;
+}
+@media (max-width:520px){
+  body{padding:0}
+  .phone{width:100%;height:100dvh;max-height:none;border-radius:0;border:0}
+}
+/* ambient glow (parallax target) */
+.glow{position:absolute;inset:-140px -60px auto -60px;height:460px;pointer-events:none;
+  background:radial-gradient(420px 320px at 30% 20%,rgba(124,58,237,.30),transparent 70%),
+             radial-gradient(360px 280px at 85% 0%,rgba(59,130,246,.16),transparent 70%);
+  transition:transform .12s linear;z-index:0}
+/* status bar */
+.status{position:relative;z-index:3;display:flex;align-items:center;gap:6px;
+  padding:14px 22px 6px;font-size:12.5px;font-weight:600;letter-spacing:.01em}
+.status .right{margin-left:auto;display:flex;gap:5px;align-items:center;color:var(--text)}
+.bars{display:flex;gap:2px;align-items:flex-end}
+.bars i{width:3px;background:var(--text);border-radius:1px;display:block}
+.bars i:nth-child(1){height:5px}.bars i:nth-child(2){height:8px}.bars i:nth-child(3){height:11px}
+.batt{width:22px;height:11px;border:1.4px solid var(--text);border-radius:3px;position:relative}
+.batt::after{content:"";position:absolute;inset:1.5px;right:6px;background:var(--text);border-radius:1px}
+/* scroll area */
+.views{position:relative;z-index:2;flex:1;overflow:hidden}
+.view{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:0 18px 108px;
+  opacity:0;visibility:hidden;transform:translateY(6px);transition:opacity .22s,transform .22s,visibility .22s}
+.view.active{opacity:1;visibility:visible;transform:none}
+.view::-webkit-scrollbar{width:0}
+/* header row */
+.row{display:flex;align-items:center;gap:10px}
+.rings{position:relative;width:30px;height:20px;flex:0 0 auto}
+.rings i{position:absolute;top:0;width:20px;height:20px;border-radius:50%;border:2.4px solid var(--purple);display:block}
+.rings i+i{left:11px;border-color:var(--blue)}
+.brand{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 12px;
+  font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06)}
+.pill.streak{background:linear-gradient(90deg,rgba(255,107,53,.24),rgba(255,159,28,.14));
+  border-color:rgba(255,107,53,.45);color:var(--text)}
+.flame{width:12px;height:14px;background:var(--amber);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  transform:rotate(-6deg)}
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 10px;
+  font-size:11.5px;color:var(--grey);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}
+.iconbtn{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  color:var(--grey);background:transparent;border:0;font-size:15px}
+/* greeting */
+.greet{margin:18px 0 0}
+.greet .hi{font-size:15px;color:var(--grey)}
+.greet .goal{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+/* glass card */
+.card{background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
+  border:1px solid rgba(255,255,255,.10);border-radius:22px;padding:16px;margin-top:14px}
+.card.flat{background:rgba(255,255,255,.055)}
+.lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);font-weight:700}
+.cardhead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.cardhead h3{margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em;flex:1}
+.cardhead .xp{font-size:13px;color:var(--grey);font-weight:600}
+/* progress */
+.bar{height:9px;border-radius:99px;background:rgba(255,255,255,.10);overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--green),var(--cyan))}
+.hint{font-size:13px;color:var(--grey);margin-top:10px}
+/* continue card */
+.hero-card{border-radius:22px;padding:16px;margin-top:14px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#4C1D95 0%,#7C3AED 42%,#5B5BF5 72%,#3B82F6 100%);
+  border:1px solid rgba(255,255,255,.18);transform-style:preserve-3d;
+  transition:transform .15s ease-out;will-change:transform}
+.hero-card .lbl{color:var(--cyan)}
+.hero-card h2{margin:6px 0 2px;font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.hero-card .sub{font-size:13px;color:rgba(255,255,255,.82)}
+.hero-card .bar{background:rgba(255,255,255,.24);margin-top:14px}
+.hero-card .bar > i{background:var(--green)}
+.herofoot{display:flex;align-items:center;gap:12px;margin-top:14px}
+.pct{font-size:13px;font-weight:800}
+.start{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:#fff;color:#1E123A;
+  border:0;border-radius:999px;padding:11px 18px;font-size:13.5px;font-weight:800;font-family:var(--sans)}
+/* quick actions */
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:12px}
+.tile{background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:16px 8px;text-align:center}
+.tile .dot{width:38px;height:38px;border-radius:50%;margin:0 auto 9px;display:grid;place-items:center;font-size:17px}
+.tile span{font-size:12px;font-weight:700;color:var(--text)}
+/* weekly */
+.week{display:flex;justify-content:space-between;margin-top:12px}
+.day{text-align:center}
+.day b{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;font-size:12.5px;
+  font-weight:800;color:var(--grey);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.day.on b{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;border-color:transparent}
+.day.today b{border-color:var(--green);box-shadow:0 0 0 2px rgba(74,222,128,.18)}
+/* lesson rows */
+.unit{margin-top:22px}
+.unit h4{margin:0;font-size:15px;font-weight:800}
+.unit p{margin:2px 0 0;font-size:13px;color:var(--grey)}
+.lesson{display:flex;align-items:center;gap:12px;margin-top:10px;padding:12px;
+  border-radius:18px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
+.lesson .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:800}
+.lesson.done .ic{background:rgba(74,222,128,.18);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.lesson.now .ic{background:rgba(59,130,246,.18);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.lesson.lock{opacity:.55}
+.lesson .t{font-size:14.5px;font-weight:700}
+.lesson .m{font-size:11.5px;color:var(--grey);margin-top:1px}
+.tag{margin-left:auto;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--green);background:rgba(74,222,128,.16);border:1px solid rgba(74,222,128,.3);
+  border-radius:99px;padding:4px 9px}
+/* translate */
+.langrow{display:flex;align-items:center;gap:8px;margin-top:14px}
+.lang{flex:1;background:var(--high);border-radius:14px;padding:12px;text-align:center;
+  font-size:14px;font-weight:700}
+.swap{width:38px;height:38px;border-radius:50%;background:rgba(59,130,246,.16);
+  border:1px solid rgba(59,130,246,.3);color:var(--blue);display:grid;place-items:center;font-size:16px;border-width:1px}
+textarea{width:100%;min-height:110px;margin-top:12px;padding:14px;border-radius:18px;resize:none;
+  background:transparent;border:1px solid var(--border);color:var(--text);font-size:15px;
+  font-family:var(--sans);line-height:1.5;outline:none}
+textarea::placeholder{color:var(--dim)}
+.btn{width:100%;border:0;border-radius:999px;padding:15px;font-size:15px;font-weight:800;
+  font-family:var(--sans);background:linear-gradient(90deg,var(--purple),var(--indigo),var(--blue));
+  color:#fff;margin-top:12px}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text);font-weight:700;
+  padding:12px;font-size:13.5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.result{margin-top:14px}
+.result .out{font-size:17px;font-weight:700;line-height:1.4;margin-top:8px}
+.small{font-size:11.5px;color:var(--grey);line-height:1.5;margin-top:10px}
+/* practice */
+.opt{display:flex;align-items:center;gap:12px;padding:16px;border-radius:20px;margin-top:12px;
+  background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}
+.opt .d{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.opt .t{font-size:15px;font-weight:800}
+.opt .s{font-size:12.5px;color:var(--grey);margin-top:2px}
+/* flashcard */
+.flip{margin-top:16px;height:230px;perspective:1000px;cursor:pointer}
+.flip .inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:24px;display:grid;
+  place-content:center;text-align:center;padding:20px;background:var(--surface);border:1px solid var(--border)}
+.face.back{transform:rotateY(180deg);background:linear-gradient(135deg,rgba(124,58,237,.20),rgba(59,130,246,.14))}
+.face .w{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.face .m{font-size:15px;color:var(--green);margin-top:10px;font-weight:700}
+.face .n{font-size:12px;color:var(--grey);margin-top:8px}
+/* progress screen */
+.streakcard{display:flex;align-items:center;gap:14px}
+.streakball{width:52px;height:52px;border-radius:50%;background:var(--amber);color:#2A1704;
+  display:grid;place-items:center;font-size:20px;font-weight:800;flex:0 0 auto}
+.streakcard h3{margin:0;font-size:17px;font-weight:800}
+.streakcard p{margin:2px 0 0;font-size:13px;color:var(--grey)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px}
+.stat{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:14px}
+.stat b{font-size:22px;font-weight:800;color:var(--green);display:block;letter-spacing:-.02em}
+.stat span{font-size:12.5px;color:var(--grey)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.cal i{aspect-ratio:1;border-radius:8px;background:rgba(255,255,255,.07);display:block}
+.cal i.on{background:var(--purple)}
+.cal i.today{box-shadow:0 0 0 2px var(--green) inset}
+.ach{display:flex;align-items:center;gap:11px;padding:12px;border-radius:16px;margin-top:9px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.ach .b{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:13px;
+  background:rgba(255,255,255,.07);color:var(--grey)}
+.ach.got .b{background:rgba(74,222,128,.18);color:var(--green)}
+.ach .t{font-size:13.5px;font-weight:700}
+.ach .s{font-size:11.5px;color:var(--grey)}
+/* tab bar */
+.tabbar{position:absolute;left:16px;right:16px;bottom:14px;height:66px;z-index:5;
+  display:flex;align-items:center;border-radius:26px;
+  background:rgba(20,20,28,.86);backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.12)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;
+  background:none;border:0;color:var(--grey);font-family:var(--sans);font-size:10.5px;font-weight:700}
+.tab .g{width:20px;height:20px;display:grid;place-items:center}
+.tab.on{color:var(--green)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="glow" id="glow"></div>
+
+  <div class="status">
+    <span id="clock">9:41</span>
+    <span class="right">
+      <span class="bars"><i></i><i></i><i></i></span>
+      <span class="batt"></span>
+    </span>
+  </div>
+
+  <div class="views" id="views">
+
+    <!-- ================= LEARN ================= -->
+    <section class="view active" id="v-learn">
+      <div class="row" style="margin-top:8px">
+        <span class="rings"><i></i><i></i></span>
+        <span class="brand">Duo Learning</span>
+        <span style="flex:1"></span>
+        <span class="pill streak"><span class="flame"></span>7</span>
+        <span class="chip">⚡ 2,450</span>
+        <button class="iconbtn" aria-label="Settings">⚙</button>
+      </div>
+
+      <div class="greet">
+        <div class="hi" id="hello">Good morning</div>
+        <div class="goal">Let's hit your goal today!</div>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <span class="pill" style="font-size:12.5px;color:var(--text)">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>
+          Learning Hindi <span style="color:var(--grey)">▾</span>
+        </span>
+      </div>
+
+      <div class="card">
+        <div class="cardhead">
+          <h3>Daily Goal Progress</h3><span class="xp">30 / 50 XP</span>
+        </div>
+        <div class="bar"><i style="width:60%"></i></div>
+        <div class="hint">20 XP to go to hit your daily goal!</div>
+      </div>
+
+      <div class="hero-card" id="hero">
+        <div class="lbl">Continue learning</div>
+        <h2>Unit: Everyday things</h2>
+        <div class="sub">Greetings · Vocab</div>
+        <div class="bar"><i style="width:44%"></i></div>
+        <div class="herofoot">
+          <span class="pct">44%</span>
+          <button class="start">Resume ▶</button>
+        </div>
+      </div>
+
+      <div class="unit"><h4>Quick Actions</h4></div>
+      <div class="qa">
+        <div class="tile"><div class="dot" style="background:rgba(59,130,246,.20);color:var(--blue)">⇄</div><span>Translate</span></div>
+        <div class="tile"><div class="dot" style="background:rgba(124,58,237,.22);color:#B18AFF">◈</div><span>Practice</span></div>
+        <div class="tile"><div class="dot" style="background:rgba(34,211,238,.20);color:var(--cyan)">▤</div><span>Vocabulary</span></div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h3 style="font-size:14px">Weekly Activity</h3></div>
+        <div class="week">
+          <div class="day on"><b>M</b></div><div class="day on"><b>T</b></div>
+          <div class="day on"><b>W</b></div><div class="day on"><b>T</b></div>
+          <div class="day on"><b>F</b></div><div class="day"><b>S</b></div>
+          <div class="day today"><b>S</b></div>
+        </div>
+      </div>
+
+      <div class="unit">
+        <h4>Basics</h4><p>Greetings and pronouns</p>
+        <div class="lesson done"><span class="ic">✓</span>
+          <div><div class="t">Greetings</div><div class="m">Vocab · best 100%</div></div><span class="tag">Done</span></div>
+        <div class="lesson now"><span class="ic">▶</span>
+          <div><div class="t">Pronouns</div><div class="m">Grammar · best 90%</div></div></div>
+        <div class="lesson lock"><span class="ic">🔒</span>
+          <div><div class="t">Checkpoint</div><div class="m">Checkpoint</div></div></div>
+      </div>
+    </section>
+
+    <!-- ================= TRANSLATE ================= -->
+    <section class="view" id="v-translate">
+      <div class="row" style="margin-top:8px">
+        <span class="rings"><i></i><i></i></span>
+        <span class="brand">Duo Translate</span>
+        <span style="flex:1"></span>
+        <span class="pill" style="font-size:12px">Saved (3)</span>
+      </div>
+
+      <div class="langrow">
+        <div class="lang">English</div>
+        <div class="swap">⇄</div>
+        <div class="lang">Hindi</div>
+      </div>
+
+      <textarea id="src" placeholder="Type or paste text…">I love learning new languages.</textarea>
+      <div class="two">
+        <button class="btn ghost" onclick="document.getElementById('src').value=''">Clear</button>
+        <button class="btn ghost" onclick="navigator.clipboard&&navigator.clipboard.readText().then(t=>document.getElementById('src').value=t).catch(()=>{})">Paste</button>
+      </div>
+
+      <button class="btn" onclick="translateTap()">Translate</button>
+
+      <div class="card result" id="resultCard">
+        <div class="lbl">Translation</div>
+        <div class="out" id="out">मैं नई भाषाएँ सीखना पसंद करता हूँ।</div>
+        <div class="small" id="outNote">Sample result — in the app this comes from the on-device engine.</div>
+      </div>
+
+      <div class="card">
+        <div class="lbl" style="color:var(--cyan)">Learn this</div>
+        <div style="font-size:13.5px;color:var(--grey);margin-top:8px">I love learning new languages.</div>
+        <div style="font-size:15px;font-weight:700;margin-top:6px">मैं नई भाषाएँ सीखना पसंद करता हूँ।</div>
+        <div class="two">
+          <button class="btn ghost">Add to vocabulary</button>
+          <button class="btn ghost">Practise</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PRACTICE ================= -->
+    <section class="view" id="v-practice">
+      <div class="row" style="margin-top:8px">
+        <span class="rings"><i></i><i></i></span>
+        <span class="brand">Practice</span>
+      </div>
+      <div class="greet"><div class="hi">Spaced repetition and saved drills</div></div>
+
+      <div class="opt"><span class="d" style="background:var(--green)"></span>
+        <div><div class="t">Flashcards</div><div class="s">Words due today, scheduled by SM-2</div></div></div>
+      <div class="opt"><span class="d" style="background:var(--orange)"></span>
+        <div><div class="t">Difficult words</div><div class="s">The vocabulary you get wrong most</div></div></div>
+      <div class="opt"><span class="d" style="background:var(--blue)"></span>
+        <div><div class="t">Saved translations</div><div class="s">3 saved · revise the phrases you kept</div></div></div>
+
+      <div class="unit"><h4>Today</h4><p>Tap the card to flip</p></div>
+      <div class="flip" id="flip" onclick="this.classList.toggle('on')">
+        <div class="inner">
+          <div class="face">
+            <div class="w">नमस्ते</div>
+            <div class="n">tap to reveal</div>
+          </div>
+          <div class="face back">
+            <div class="w" style="font-size:26px;color:var(--green)">Hello</div>
+            <div class="m">नमस्ते, आप कैसे हैं?</div>
+            <div class="n">Hello, how are you?</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PROGRESS ================= -->
+    <section class="view" id="v-progress">
+      <div class="row" style="margin-top:8px">
+        <span class="rings"><i></i><i></i></span>
+        <span class="brand">Progress</span>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="streakcard">
+          <div class="streakball">7</div>
+          <div><h3>Current streak</h3><p>Longest: 12 days</p></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--grey);margin:14px 0 6px">
+          <span>45 / 50 XP</span><span style="color:var(--green);font-weight:700">90%</span>
+        </div>
+        <div class="bar"><i style="width:90%"></i></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b>1240</b><span>Total XP</span></div>
+        <div class="stat"><b>15</b><span>Lessons</span></div>
+        <div class="stat"><b>63</b><span>Words</span></div>
+        <div class="stat"><b>4 / 13</b><span>Badges</span></div>
+      </div>
+
+      <div class="unit"><h4>Learning calendar</h4></div>
+      <div class="card" style="margin-top:10px"><div class="cal" id="cal"></div></div>
+
+      <div class="unit"><h4>Achievements</h4></div>
+      <div class="ach got"><span class="b">✓</span><div><div class="t">Week Warrior</div><div class="s">Reach a 7-day streak</div></div></div>
+      <div class="ach got"><span class="b">✓</span><div><div class="t">Word Collector</div><div class="s">Learn 25 words</div></div></div>
+      <div class="ach"><span class="b">•</span><div><div class="t">Unstoppable</div><div class="s">Reach a 30-day streak</div></div></div>
+    </section>
+  </div>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab on" data-view="v-learn"><span class="g"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2.5"/><path d="M10 3v14"/></svg></span>Learn</button>
+    <button class="tab" data-view="v-translate"><span class="g"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M3 10h14"/><path d="M10 3c2.2 2.2 3.2 4.6 3.2 7s-1 4.8-3.2 7c-2.2-2.2-3.2-4.6-3.2-7s1-4.8 3.2-7z"/></svg></span>Translate</button>
+    <button class="tab" data-view="v-practice"><span class="g"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="13" rx="2.2"/><rect x="3" y="5.5" width="10" height="13" rx="2.2"/></svg></span>Practice</button>
+    <button class="tab" data-view="v-progress"><span class="g"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 16v-5"/><path d="M10 16V7"/><path d="M16 16V4"/></svg></span>Progress</button>
+  </nav>
+</div>
+
+<script>
+// --- clock ---
+(function(){
+  var d=new Date(), h=d.getHours(), m=d.getMinutes();
+  document.getElementById('clock').textContent = h.toString().padStart(2,'0')+':'+m.toString().padStart(2,'0');
+  var el=document.getElementById('hello');
+  el.textContent = h<12 ? 'Good morning' : h<17 ? 'Good afternoon' : 'Good evening';
+})();
+
+// --- tabs ---
+document.getElementById('tabbar').addEventListener('click', function(e){
+  var b=e.target.closest('.tab'); if(!b) return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id===b.dataset.view));
+  document.getElementById('glow').style.transform='translateY(0)';
+});
+
+// --- parallax + depth (mirrors the app's effect) ---
+var views=document.getElementById('views'), glow=document.getElementById('glow'), hero=document.getElementById('hero');
+views.addEventListener('scroll', function(){
+  var y=views.scrollTop;
+  glow.style.transform='translateY('+(-y*0.22)+'px)';
+  var tilt=Math.max(-9,Math.min(9,y/55))*0.6;
+  hero.style.transform='rotateX('+tilt+'deg)';
+}, {passive:true});
+views.addEventListener('scroll', function(){}, {passive:true});
+
+// --- calendar ---
+(function(){
+  var cal=document.getElementById('cal'), seed=7, out='';
+  for(var i=0;i<28;i++){
+    seed=(seed*1103515245+12345)%2147483647;
+    var on=((seed>>>8)%100)<62, today=(i===24);
+    out+='<i class="'+(on?'on':'')+(today?' today':'')+'"></i>';
+  }
+  cal.innerHTML=out;
+})();
+
+// --- translate (preview only) ---
+function translateTap(){
+  var t=document.getElementById('src').value.trim();
+  var out=document.getElementById('out'), note=document.getElementById('outNote');
+  if(!t){ out.textContent='—'; note.textContent='Type something first.'; return; }
+  if(t.toLowerCase().indexOf('love learning')>-1){
+    out.textContent='मैं नई भाषाएँ सीखना पसंद करता हूँ।';
+  } else {
+    out.textContent='…';
+  }
+  note.textContent='UI preview — the real app translates on-device with ML Kit, offline.';
+}
+</script>
+</body>
+</html>
