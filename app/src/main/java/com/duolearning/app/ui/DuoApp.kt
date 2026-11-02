@@ -3,8 +3,10 @@ package com.duolearning.app.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
@@ -29,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -43,6 +46,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.duolearning.app.data.prefs.UserSettings
 import com.duolearning.app.ui.navigation.Routes
 import com.duolearning.app.ui.screens.home.HomeScreen
 import com.duolearning.app.ui.screens.language.LanguagePickerScreen
@@ -168,9 +172,20 @@ private fun DuoBottomBar(nav: NavHostController, currentRoute: String?) {
     BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         val tabW = maxWidth / tabs.size
         val idx = tabs.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
+        val fx by LocalContainer.current.preferences.settings
+            .collectAsStateWithLifecycle(initial = UserSettings())
+        // Speed and Bounce from the effects sheet drive this animation.
+        val lensSpec = if (!fx.animationsEnabled) {
+            snap()
+        } else {
+            spring<androidx.compose.ui.unit.Dp>(
+                dampingRatio = (1.8f - fx.bouncePct / 100f).coerceIn(0.3f, 1.4f),
+                stiffness = (Spring.StiffnessMedium * (fx.speedPct / 100f)).coerceAtLeast(1f)
+            )
+        }
         val lensX by animateDpAsState(
             targetValue = tabW * idx,
-            animationSpec = tween(durationMillis = 260),
+            animationSpec = lensSpec,
             label = "lens"
         )
         // Sliding highlight that travels to the selected tab.
