@@ -3,7 +3,12 @@ package com.duolearning.app.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -160,7 +165,24 @@ fun DuoApp() {
 @Composable
 private fun DuoBottomBar(nav: NavHostController, currentRoute: String?) {
     val shape = RoundedCornerShape(28.dp)
-    Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+    BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        val tabW = maxWidth / tabs.size
+        val idx = tabs.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
+        val lensX by animateDpAsState(
+            targetValue = tabW * idx,
+            animationSpec = tween(durationMillis = 260),
+            label = "lens"
+        )
+        // Sliding highlight that travels to the selected tab.
+        Box(
+            Modifier
+                .offset(x = lensX)
+                .width(tabW)
+                .height(64.dp)
+                .padding(horizontal = 8.dp, vertical = 10.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color.White.copy(alpha = 0.14f))
+        )
         Row(
             Modifier
                 .fillMaxWidth()
