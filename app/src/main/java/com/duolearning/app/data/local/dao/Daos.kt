@@ -60,10 +60,13 @@ interface VocabProgressDao {
     @Upsert
     suspend fun upsertAll(entities: List<VocabProgressEntity>)
 
-    @Query("SELECT COUNT(*) FROM vocab_progress WHERE courseCode = :course")
+    // A word counts as learned once it has been reviewed at least once.
+    // Rows are seeded for a whole course up front, so counting every row would
+    // report the entire course as learned before the user opened a lesson.
+    @Query("SELECT COUNT(*) FROM vocab_progress WHERE courseCode = :course AND repetitions > 0")
     fun learnedCount(course: String): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM vocab_progress")
+    @Query("SELECT COUNT(*) FROM vocab_progress WHERE repetitions > 0")
     suspend fun learnedCountNow(): Int
 
     @Query("UPDATE vocab_progress SET favourite = :fav WHERE vocabId = :id")
