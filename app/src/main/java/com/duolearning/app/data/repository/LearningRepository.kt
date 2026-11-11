@@ -158,10 +158,20 @@ class LearningRepository(
                 )
             )
         }
-        return awardActivity(xp, lessonsDelta = if (lessonId != null && passed) 1 else 0, qualifying = qualifying)
+        return awardActivity(
+            xp = xp,
+            lessonsDelta = if (lessonId != null && passed) 1 else 0,
+            qualifying = qualifying,
+            passed = passed
+        )
     }
 
-    private suspend fun awardActivity(xp: Int, lessonsDelta: Int, qualifying: Boolean): ActivityResult {
+    private suspend fun awardActivity(
+        xp: Int,
+        lessonsDelta: Int,
+        qualifying: Boolean,
+        passed: Boolean
+    ): ActivityResult {
         val today = Dates.todayEpochDay()
         val activity = db.activityDao().byDay(today) ?: DailyActivityEntity(epochDay = today)
         db.activityDao().upsert(
@@ -185,7 +195,7 @@ class LearningRepository(
         val unlocked = evaluateAchievements()
         return ActivityResult(
             xpAwarded = xp,
-            passed = true,
+            passed = passed,
             newStreak = newStreak,
             streakExtended = qualifying && newStreak > before,
             unlockedAchievements = unlocked

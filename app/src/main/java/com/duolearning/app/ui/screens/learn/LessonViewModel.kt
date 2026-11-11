@@ -207,7 +207,13 @@ class LessonViewModel(
         val passed = result.passed
         found.vocab.forEach { learning.reviewVocab(it.id, passed) }
 
-        val nextId = orderedLessonIds.getOrNull(orderedLessonIds.indexOf(lessonId) + 1)
+        // Only offer the next lesson when this one was actually passed; the
+        // next lesson is still locked otherwise.
+        val nextId = if (result.passed) {
+            orderedLessonIds.getOrNull(orderedLessonIds.indexOf(lessonId) + 1)
+        } else {
+            null
+        }
         _state.update { it.copy(finished = true, result = result, nextLessonId = nextId) }
     }
 
