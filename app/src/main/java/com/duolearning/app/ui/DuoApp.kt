@@ -30,6 +30,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
@@ -38,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -72,6 +75,17 @@ private val tabs = listOf(
 @Composable
 fun DuoApp() {
     val nav = rememberNavController()
+    val container = LocalContainer.current
+    val mainVm: MainViewModel = viewModel(factory = MainViewModel.Factory)
+    val settings by mainVm.settings.collectAsStateWithLifecycle()
+
+    // Speech speed and the sound toggle live in Settings but are consumed by
+    // the text-to-speech engine, so apply them once the app is up and on
+    // every change.
+    LaunchedEffect(settings.speechRate, settings.soundEnabled) {
+        container.tts.setSpeechRate(settings.speechRate)
+        container.tts.setSoundEnabled(settings.soundEnabled)
+    }
     val backStackEntry by nav.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val showBar = currentRoute in tabs.map { it.route }

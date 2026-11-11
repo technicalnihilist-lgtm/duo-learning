@@ -29,6 +29,9 @@ class TtsManager(context: Context) {
 
     private var speechRate = 1.0f
 
+    /** Mirrors the "Sound" preference; when off, [speak] does nothing. */
+    private var soundEnabled = true
+
     init {
         tts = TextToSpeech(context.applicationContext) { status ->
             _ready.value = status == TextToSpeech.SUCCESS
@@ -47,6 +50,12 @@ class TtsManager(context: Context) {
         tts?.setSpeechRate(speechRate)
     }
 
+    /** Applies the user's sound preference; muting also stops any utterance. */
+    fun setSoundEnabled(on: Boolean) {
+        soundEnabled = on
+        if (!on) stop()
+    }
+
     /** True when the device has a usable voice for [languageCode]. */
     fun hasVoice(languageCode: String): Boolean {
         val engine = tts ?: return false
@@ -62,6 +71,7 @@ class TtsManager(context: Context) {
      * the caller can surface a helpful message rather than doing nothing.
      */
     fun speak(text: String, languageCode: String): Boolean {
+        if (!soundEnabled) return false
         val engine = tts ?: return false
         if (text.isBlank()) return false
         val locale = Locale.forLanguageTag(languageCode)
