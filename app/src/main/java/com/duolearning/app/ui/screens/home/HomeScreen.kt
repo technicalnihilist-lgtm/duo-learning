@@ -3,6 +3,7 @@ package com.duolearning.app.ui.screens.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -122,7 +123,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            item { HeaderBar(state) { showFx = true } }
+            item { HeaderBar(state, onOpenSettings = onOpenSettings, onOpenEffects = { showFx = true }) }
 
             item {
                 Text(
@@ -236,17 +237,29 @@ private fun greeting(): String {
 }
 
 @Composable
-private fun HeaderBar(state: HomeUiState, onOpenSettings: () -> Unit) {
+private fun HeaderBar(
+    state: HomeUiState,
+    onOpenSettings: () -> Unit,
+    onOpenEffects: () -> Unit
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        DuoLogo(30)
-        Spacer(Modifier.width(10.dp))
-        Text(
-            "Duo Learning",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
-        )
+        // Long-press the wordmark to open the visual-effects sheet; the gear
+        // icon belongs to Settings.
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .pointerInput(Unit) { detectTapGestures(onLongPress = { onOpenEffects() }) },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            DuoLogo(30)
+            Spacer(Modifier.width(10.dp))
+            Text(
+                "Duo Learning",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+        }
         StreakPill(state.streak)
         Spacer(Modifier.width(8.dp))
         StatChip(icon = {
