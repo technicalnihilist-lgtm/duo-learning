@@ -119,10 +119,12 @@ class HomeViewModel(
         val completedIds = lessons.filter { it.completed }.associateBy { it.lessonId }
         val scoreById = lessons.associate { it.lessonId to it.bestScore }
 
-        val unitRows = course?.units?.mapIndexed { _, unit ->
-            // Sequential unlock across the whole course.
+        // Sequential unlock across the whole course: the first lesson is
+        // always open, and every other lesson unlocks only once the lesson
+        // before it (in the previous unit too) is completed.
+        var previousCompleted = true
+        val unitRows = course?.units?.map { unit ->
             val rows = mutableListOf<LessonRow>()
-            var previousCompleted = true
             unit.lessons.forEach { lesson ->
                 rows += LessonRow(
                     id = lesson.id,
