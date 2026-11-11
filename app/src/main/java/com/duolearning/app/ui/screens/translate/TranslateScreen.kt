@@ -67,6 +67,7 @@ fun TranslateScreen(
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val history by vm.history.collectAsStateWithLifecycle()
+    val saved by vm.saved.collectAsStateWithLifecycle()
     val tts = LocalContainer.current.tts
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
@@ -87,7 +88,7 @@ fun TranslateScreen(
                     color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f))
                 OutlinedButton(onClick = onOpenSaved, shape = RoundedCornerShape(12.dp)) {
-                    Text("Saved (${history.size})", color = MaterialTheme.colorScheme.onBackground)
+                    Text("Saved (${saved.size})", color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         }
