@@ -73,18 +73,17 @@ class LearningRepository(
         )
     }
 
-    fun observeXpToday(): Flow<Int> {
+    // The current day is resolved on every emission rather than once when the
+    // flow is created, so an app left open past midnight does not keep
+    // reporting yesterday's XP against today's goal.
+    fun observeXpToday(): Flow<Int> = db.activityDao().recent(7).map { rows ->
         val today = Dates.todayEpochDay()
-        return db.activityDao().recent(7).map { rows ->
-            rows.firstOrNull { it.epochDay == today }?.xpEarned ?: 0
-        }
+        rows.firstOrNull { it.epochDay == today }?.xpEarned ?: 0
     }
 
-    fun observeStreakExtendedToday(): Flow<Boolean> {
+    fun observeStreakExtendedToday(): Flow<Boolean> = db.activityDao().recent(1).map { rows ->
         val today = Dates.todayEpochDay()
-        return db.activityDao().recent(1).map { rows ->
-            rows.firstOrNull()?.let { it.epochDay == today && it.qualified } ?: false
-        }
+        rows.firstOrNull()?.let { it.epochDay == today && it.qualified } ?: false
     }
 
     suspend fun ensureVocabSeeded(course: String) {
