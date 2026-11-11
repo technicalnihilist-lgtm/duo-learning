@@ -10,6 +10,7 @@ import com.duolearning.app.data.repository.TranslationRepository
 import com.duolearning.app.translate.TranslationError
 import com.duolearning.app.translate.TranslationResult
 import com.duolearning.app.ui.duoFactory
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -98,14 +99,29 @@ class TranslateViewModel(
         translateJob?.cancel()
         _state.update { it.copy(loading = true, result = null, savedJustNow = false) }
         translateJob = viewModelScope.launch {
-            if (s.source == "auto") {
-                val detected = translation.detect(s.text)
-                _state.update { it.copy(detected = detected) }
-            } else {
-                _state.update { it.copy(detected = s.source) }
+            try {
+                if (s.source == "auto") {
+                    val detected = translation.detect(s.text)
+                    _state.update { it.copy(detected = detected) }
+                } else {
+                    _state.update { it.copy(detected = s.source) }
+                }
+                val result = translation.translate(s.text, s.source, s.target)
+                _state.update { it.copy(loading = false, result = result) }
+            } catch (c: CancellationException) {
+                throw c
+            } catch (t: Throwable) {
+                // Never leave the spinner running on an unexpected failure.
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        result = TranslationResult.Failure(
+                            TranslationError.ENGINE_ERROR,
+                            t.message ?: "Translation failed unexpectedly."
+                        )
+                    )
+                }
             }
-            val result = translation.translate(s.text, s.source, s.target)
-            _state.update { it.copy(loading = false, result = result) }
         }
     }
 

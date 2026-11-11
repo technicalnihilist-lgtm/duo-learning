@@ -33,6 +33,15 @@ class TranslationRepository(
         }
         val effectiveSource = if (source == "auto") (identifier.detect(trimmed) ?: "auto") else source
 
+        if (effectiveSource == "auto") {
+            // Detection found nothing usable; say so instead of handing "auto"
+            // to the engine, which can only fail with a generic error.
+            return TranslationResult.Failure(
+                TranslationError.LANGUAGE_NOT_DETECTED,
+                "Couldn't tell which language that is. Pick the source language and try again."
+            )
+        }
+
         if (effectiveSource != "auto" && effectiveSource == target) {
             // Same language: echoing input would look like a fake success.
             return TranslationResult.Failure(

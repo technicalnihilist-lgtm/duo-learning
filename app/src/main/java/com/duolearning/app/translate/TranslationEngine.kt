@@ -8,6 +8,8 @@ sealed interface TranslationResult {
 
 enum class TranslationError {
     EMPTY_INPUT,
+    /** "Detect language" was selected but no language could be identified. */
+    LANGUAGE_NOT_DETECTED,
     UNSUPPORTED_LANGUAGE_PAIR,
     MODEL_DOWNLOAD_FAILED,
     NETWORK_REQUIRED,
