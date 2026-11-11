@@ -116,28 +116,41 @@ class PracticeViewModel(
 
     fun reveal() = _state.update { it.copy(revealed = true) }
 
-    /** Grade the current card; advances to the next or finishes the session. */
-    fun grade(correct: Boolean) = viewModelScope.launch {
-        val s = _state.value
-        val card = s.current ?: return@launch
-        if (card.isVocab) learning.reviewVocab(card.id, correct)
+    /** Guards against a double tap grading the same card twice. */
+    private var grading = false
 
-        val nextIndex = s.index + 1
-        val newCorrect = s.correct + if (correct) 1 else 0
-        if (nextIndex >= s.cards.size) {
-            val result = learning.recordLessonResult(
-                courseCode = s.courseCode,
-                lessonId = null,
-                correct = newCorrect,
-                total = s.cards.size,
-                isCheckpoint = false,
-                qualifying = true
-            )
-            _state.update {
-                it.copy(correct = newCorrect, finished = true, result = result)
+    /** Grade the current card; advances to the next or finishes the session. */
+    fun grade(correct: Boolean) {
+        val s = _state.value
+        // Ignore taps that arrive before the answer is shown or after the
+        // session ended, and any second tap while a grade is being saved.
+        if (grading || s.finished || !s.revealed) return
+        val card = s.current ?: return
+        grading = true
+        viewModelScope.launch {
+            try {
+                if (card.isVocab) learning.reviewVocab(card.id, correct)
+
+                val nextIndex = s.index + 1
+                val newCorrect = s.correct + if (correct) 1 else 0
+                if (nextIndex >= s.cards.size) {
+                    val result = learning.recordLessonResult(
+                        courseCode = s.courseCode,
+                        lessonId = null,
+                        correct = newCorrect,
+                        total = s.cards.size,
+                        isCheckpoint = false,
+                        qualifying = true
+                    )
+                    _state.update {
+                        it.copy(correct = newCorrect, finished = true, result = result)
+                    }
+                } else {
+                    _state.update { it.copy(index = nextIndex, correct = newCorrect, revealed = false) }
+                }
+            } finally {
+                grading = false
             }
-        } else {
-            _state.update { it.copy(index = nextIndex, correct = newCorrect, revealed = false) }
         }
     }
 

@@ -61,6 +61,9 @@ class LessonViewModel(
     private var lesson: Lesson? = null
     private var orderedLessonIds: List<String> = emptyList()
 
+    /** Guards the one-shot write of a finished attempt against double taps. */
+    private var finishing = false
+
     init { load() }
 
     private fun load() = viewModelScope.launch {
@@ -183,7 +186,7 @@ class LessonViewModel(
 
     fun next() {
         val s = _state.value
-        if (!s.checked) return
+        if (!s.checked || s.finished || finishing) return
         val nextIndex = s.index + 1
         if (nextIndex < s.total) {
             prepareExercise(nextIndex)
@@ -192,7 +195,13 @@ class LessonViewModel(
         }
     }
 
-    private fun finish() = viewModelScope.launch {
+    private fun finish() {
+        if (finishing) return
+        finishing = true
+        finishAttempt()
+    }
+
+    private fun finishAttempt() = viewModelScope.launch {
         val s = _state.value
         val found = lesson ?: return@launch
         val result = learning.recordLessonResult(
