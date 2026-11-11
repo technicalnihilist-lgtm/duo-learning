@@ -155,7 +155,8 @@ private fun ExerciseBody(state: LessonUiState, ex: ExerciseSpec, vm: LessonViewM
             ) {
                 Text(
                     if (state.selectedTokens.isEmpty()) "Tap the words below in order"
-                    else state.selectedTokens.joinToString(" "),
+                    else state.selectedTokens.mapNotNull { state.bank.getOrNull(it) }
+                        .joinToString(" "),
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
@@ -196,23 +197,23 @@ private fun ExerciseBody(state: LessonUiState, ex: ExerciseSpec, vm: LessonViewM
 @Composable
 private fun TokenWrap(
     bank: List<String>,
-    selected: List<String>,
+    selected: List<Int>,
     locked: Boolean,
-    onToggle: (String) -> Unit
+    onToggle: (Int) -> Unit
 ) {
     androidx.compose.foundation.layout.FlowRow(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        bank.forEach { token ->
-            val used = selected.contains(token)
+        bank.forEachIndexed { index, token ->
+            val used = selected.contains(index)
             Box(
                 Modifier.clip(RoundedCornerShape(12.dp))
                     .background(if (used) DuoSurface else DuoSurfaceHigh)
                     .border(1.dp, if (used) DuoSurfaceHigh else DuoGreen.copy(alpha = 0.4f),
                         RoundedCornerShape(12.dp))
-                    .clickable(enabled = !locked) { onToggle(token) }
+                    .clickable(enabled = !locked) { onToggle(index) }
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Text(

@@ -34,7 +34,8 @@ data class LessonUiState(
     // user answer
     val textAnswer: String = "",
     val selectedIndex: Int = -1,
-    val selectedTokens: List<String> = emptyList(),
+    /** Indices into [bank], so a word that appears twice can be used twice. */
+    val selectedTokens: List<Int> = emptyList(),
     val matches: Map<String, String> = emptyMap(),
     val selectedLeft: String? = null,
     // progress
@@ -130,10 +131,10 @@ class LessonViewModel(
         if (it.checked) it else it.copy(selectedIndex = index)
     }
 
-    fun toggleToken(token: String) = _state.update { s ->
+    fun toggleToken(bankIndex: Int) = _state.update { s ->
         if (s.checked) return@update s
         val selected = s.selectedTokens.toMutableList()
-        if (selected.contains(token)) selected.remove(token) else selected.add(token)
+        if (selected.contains(bankIndex)) selected.remove(bankIndex) else selected.add(bankIndex)
         s.copy(selectedTokens = selected)
     }
 
@@ -177,7 +178,10 @@ class LessonViewModel(
         is ExerciseSpec.TypedTranslation ->
             AnswerValidator.matchesTyped(s.textAnswer, ex.accepted)
         is ExerciseSpec.Scrambled ->
-            AnswerValidator.matchesSentence(s.selectedTokens.joinToString(" "), ex.correct)
+            AnswerValidator.matchesSentence(
+                s.selectedTokens.mapNotNull { s.bank.getOrNull(it) }.joinToString(" "),
+                ex.correct
+            )
         is ExerciseSpec.MatchPairs -> {
             val expected = ex.pairs.toMap()
             s.matches.size == ex.pairs.size && s.matches.all { (k, v) -> expected[k] == v }
