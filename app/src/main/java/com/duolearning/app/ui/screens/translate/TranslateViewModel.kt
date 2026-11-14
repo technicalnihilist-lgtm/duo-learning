@@ -74,19 +74,35 @@ class TranslateViewModel(
         }
     }
 
-    fun setSource(code: String) = _state.update { it.copy(source = code, result = null) }
-    fun setTarget(code: String) = _state.update { it.copy(target = code, result = null) }
-    fun setText(value: String) = _state.update { it.copy(text = value, savedJustNow = false) }
+    fun setSource(code: String) = _state.update { it.copy(source = code, result = null, detected = null) }
+    fun setTarget(code: String) = _state.update { it.copy(target = code, result = null, detected = null) }
+
+    /**
+     * Editing the input invalidates whatever translation is on screen: keeping
+     * it would show a result for text the user has already changed, and would
+     * let them save or copy the wrong pairing.
+     */
+    fun setText(value: String) = _state.update {
+        it.copy(text = value, result = null, detected = null, savedJustNow = false)
+    }
 
     fun swap() = _state.update {
         val newSource = it.target
         val newTarget = if (it.source == "auto") (it.detected ?: "en") else it.source
-        it.copy(source = newSource, target = newTarget, text = it.resultText ?: it.text, result = null)
+        it.copy(
+            source = newSource, target = newTarget,
+            text = it.resultText ?: it.text,
+            result = null, detected = null, savedJustNow = false
+        )
     }
 
-    fun clear() = _state.update { it.copy(text = "", result = null, savedJustNow = false) }
+    fun clear() = _state.update {
+        it.copy(text = "", result = null, detected = null, savedJustNow = false)
+    }
 
-    fun append(text: String) = _state.update { it.copy(text = it.text + text) }
+    fun append(text: String) = _state.update {
+        it.copy(text = it.text + text, result = null, detected = null, savedJustNow = false)
+    }
 
     /**
      * Kick off a translation. Any in-flight request for a previous input or
