@@ -5,13 +5,16 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "duo_prefs")
 
@@ -69,30 +72,35 @@ class UserPreferences(private val context: Context) {
         val speed = floatPreferencesKey("fx_speed")
     }
 
-    val settings: Flow<UserSettings> = context.dataStore.data.map { p ->
-        UserSettings(
-            nativeLanguage = p[Keys.native] ?: "en",
-            activeCourse = p[Keys.course] ?: "hi",
-            dailyGoalXp = p[Keys.goal] ?: 50,
-            speechRate = p[Keys.rate] ?: 1.0f,
-            soundEnabled = p[Keys.sound] ?: true,
-            currentStreak = p[Keys.streak] ?: 0,
-            longestStreak = p[Keys.longest] ?: 0,
-            lastQualifiedDay = p[Keys.lastDay] ?: -1L,
-            onboarded = p[Keys.onboarded] ?: false,
-            textScale = p[Keys.textScale] ?: 1.0f,
-            depthEffect = p[Keys.depth] ?: true,
-            parallax = p[Keys.parallax] ?: true,
-            effectStrength = p[Keys.strength] ?: 0.6f,
-            glassEffect = p[Keys.glass] ?: true,
-            animationsEnabled = p[Keys.anims] ?: true,
-            blurPx = p[Keys.blur] ?: 16f,
-            transparencyPct = p[Keys.transparency] ?: 26f,
-            depthPct = p[Keys.depthPct] ?: 100f,
-            bouncePct = p[Keys.bounce] ?: 100f,
-            speedPct = p[Keys.speed] ?: 100f
-        )
-    }
+    val settings: Flow<UserSettings> = context.dataStore.data
+        // A corrupt or unreadable preferences file would otherwise throw out of
+        // this flow and take every screen that observes settings down with it.
+        // Fall back to defaults instead, so the app stays usable.
+        .catch { t -> if (t is IOException) emit(emptyPreferences()) else throw t }
+        .map { p ->
+            UserSettings(
+                nativeLanguage = p[Keys.native] ?: "en",
+                activeCourse = p[Keys.course] ?: "hi",
+                dailyGoalXp = p[Keys.goal] ?: 50,
+                speechRate = p[Keys.rate] ?: 1.0f,
+                soundEnabled = p[Keys.sound] ?: true,
+                currentStreak = p[Keys.streak] ?: 0,
+                longestStreak = p[Keys.longest] ?: 0,
+                lastQualifiedDay = p[Keys.lastDay] ?: -1L,
+                onboarded = p[Keys.onboarded] ?: false,
+                textScale = p[Keys.textScale] ?: 1.0f,
+                depthEffect = p[Keys.depth] ?: true,
+                parallax = p[Keys.parallax] ?: true,
+                effectStrength = p[Keys.strength] ?: 0.6f,
+                glassEffect = p[Keys.glass] ?: true,
+                animationsEnabled = p[Keys.anims] ?: true,
+                blurPx = p[Keys.blur] ?: 16f,
+                transparencyPct = p[Keys.transparency] ?: 26f,
+                depthPct = p[Keys.depthPct] ?: 100f,
+                bouncePct = p[Keys.bounce] ?: 100f,
+                speedPct = p[Keys.speed] ?: 100f
+            )
+        }
 
     suspend fun setNativeLanguage(code: String) = edit { it[Keys.native] = code }
     suspend fun setActiveCourse(code: String) = edit { it[Keys.course] = code }
