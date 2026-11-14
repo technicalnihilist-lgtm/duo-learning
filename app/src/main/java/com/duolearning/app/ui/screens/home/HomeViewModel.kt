@@ -157,10 +157,7 @@ class HomeViewModel(
             nextLessonId = nextId,
             units = unitRows,
             weekDone = (6 downTo 0).map { back -> (today - back) in qualifiedDays },
-            weekLabels = (6 downTo 0).map { back ->
-                com.duolearning.app.domain.Dates.epochDayToLocalDate(today - back)
-                    .dayOfWeek.name.take(1)
-            },
+            weekLabels = (6 downTo 0).map { back -> Dates.shortWeekday(today - back) },
             todayIndex = 6,
             depthEffect = depthEffect,
             parallax = parallax,

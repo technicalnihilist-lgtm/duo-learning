@@ -17,4 +17,19 @@ object Dates {
     fun dayOfMonth(day: Long): Int = epochDayToLocalDate(day).dayOfMonth
 
     fun monthOf(day: Long): Int = epochDayToLocalDate(day).monthValue
+
+    /**
+     * Two-letter weekday label (Mo, Tu, We, Th, Fr, Sa, Su) for [day].
+     *
+     * Single initials are ambiguous - Tuesday and Thursday both start with
+     * "T", Saturday and Sunday with "S" - so the activity strip needs two
+     * letters to be readable.
+     */
+    fun shortWeekday(day: Long): String =
+        SHORT_WEEKDAYS[epochDayToLocalDate(day).dayOfWeek.value - 1]
+
+    private val SHORT_WEEKDAYS = listOf("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
+
+    /** The two-letter weekday labels, Monday first. */
+    val shortWeekdays: List<String> = SHORT_WEEKDAYS
 }

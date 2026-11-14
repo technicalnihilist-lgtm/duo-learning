@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.duolearning.app.domain.Dates
 import com.duolearning.app.ui.components.AmbientBlobs
 import com.duolearning.app.ui.components.DuoLogo
 import com.duolearning.app.ui.components.FxSheet
@@ -165,7 +166,7 @@ fun HomeScreen(
             item {
                 GlassCard(Modifier.fillMaxWidth()) {
                     WeeklyActivity(
-                        labels = state.weekLabels.ifEmpty { listOf("M", "T", "W", "T", "F", "S", "S") },
+                        labels = state.weekLabels.ifEmpty { Dates.shortWeekdays },
                         done = state.weekDone.ifEmpty { List(7) { false } },
                         todayIndex = state.todayIndex
                     )
