@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -150,11 +149,12 @@ private fun FxSlider(
     unit: String,
     onChange: (Float) -> Unit
 ) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-            Text("${value.toInt()}$unit", style = MaterialTheme.typography.bodyMedium, color = DuoCyan)
+    Box(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        PreferenceSlider(value = value, valueRange = min..max, onCommit = onChange) { live ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                Text("${live.toInt()}$unit", style = MaterialTheme.typography.bodyMedium, color = DuoCyan)
+            }
         }
-        Slider(value = value, onValueChange = onChange, valueRange = min..max)
     }
 }

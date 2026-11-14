@@ -21,8 +21,13 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -211,6 +216,38 @@ fun XpProgressBar(current: Int, goal: Int, modifier: Modifier = Modifier) {
             trackColor = Color.White.copy(alpha = 0.10f),
             gapSize = 0.dp,
             drawStopIndicator = {}
+        )
+    }
+}
+
+/**
+ * A slider that keeps the thumb in local state while it is being dragged and
+ * only reports the value once the user lets go.
+ *
+ * Binding a slider straight to a stored preference writes on every drag frame
+ * (dozens of DataStore edits per second, each one recomposing every screen that
+ * observes the settings). [header] receives the live value so the label still
+ * follows the thumb.
+ */
+@Composable
+fun PreferenceSlider(
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    onCommit: (Float) -> Unit,
+    steps: Int = 0,
+    header: @Composable (Float) -> Unit
+) {
+    // Re-seed only when the stored value changes, so a drag in progress is
+    // never overwritten by a stale emission.
+    var local by remember(value) { mutableStateOf(value) }
+    Column(Modifier.fillMaxWidth()) {
+        header(local)
+        Slider(
+            value = local,
+            onValueChange = { local = it },
+            onValueChangeFinished = { onCommit(local) },
+            valueRange = valueRange,
+            steps = steps
         )
     }
 }

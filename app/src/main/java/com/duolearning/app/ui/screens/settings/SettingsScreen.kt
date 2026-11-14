@@ -23,7 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.duolearning.app.BuildConfig
 import com.duolearning.app.data.content.LanguageCatalog
 import com.duolearning.app.ui.components.DuoCard
+import com.duolearning.app.ui.components.PreferenceSlider
 import com.duolearning.app.ui.components.SectionHeader
 import com.duolearning.app.ui.theme.DuoGreen
 import com.duolearning.app.ui.theme.DuoGrey
@@ -91,14 +91,15 @@ fun SettingsScreen(
         item { SectionHeader("Daily goal") }
         item {
             DuoCard(Modifier.fillMaxWidth()) {
-                Text("${settings.dailyGoalXp} XP per day",
-                    color = MaterialTheme.colorScheme.onBackground)
-                Slider(
+                PreferenceSlider(
                     value = settings.dailyGoalXp.toFloat(),
-                    onValueChange = { vm.setGoal(it.toInt()) },
                     valueRange = 10f..200f,
-                    steps = 18
-                )
+                    steps = 18,
+                    onCommit = { vm.setGoal(it.toInt()) }
+                ) { live ->
+                    Text("${live.toInt()} XP per day",
+                        color = MaterialTheme.colorScheme.onBackground)
+                }
             }
         }
 
@@ -111,12 +112,13 @@ fun SettingsScreen(
                     Switch(checked = settings.soundEnabled, onCheckedChange = vm::setSound)
                 }
                 Spacer(Modifier.height(8.dp))
-                Text("Speech speed: ${"%.1f".format(settings.speechRate)}x", color = DuoGrey)
-                Slider(
+                PreferenceSlider(
                     value = settings.speechRate,
-                    onValueChange = vm::setSpeechRate,
-                    valueRange = 0.5f..2.0f
-                )
+                    valueRange = 0.5f..2.0f,
+                    onCommit = vm::setSpeechRate
+                ) { live ->
+                    Text("Speech speed: ${"%.1f".format(live)}x", color = DuoGrey)
+                }
             }
         }
 
@@ -145,28 +147,30 @@ fun SettingsScreen(
                     Switch(checked = settings.parallax, onCheckedChange = vm::setParallax)
                 }
                 Spacer(Modifier.height(10.dp))
-                Text(
-                    "Effect strength: ${(settings.effectStrength * 100).toInt()}%",
-                    style = MaterialTheme.typography.bodyMedium, color = DuoGrey
-                )
-                Slider(
+                PreferenceSlider(
                     value = settings.effectStrength,
-                    onValueChange = vm::setEffectStrength,
-                    valueRange = 0f..1f
-                )
+                    valueRange = 0f..1f,
+                    onCommit = vm::setEffectStrength
+                ) { live ->
+                    Text(
+                        "Effect strength: ${(live * 100).toInt()}%",
+                        style = MaterialTheme.typography.bodyMedium, color = DuoGrey
+                    )
+                }
             }
         }
 
         item { SectionHeader("Accessibility") }
         item {
             DuoCard(Modifier.fillMaxWidth()) {
-                Text("Text size: ${(settings.textScale * 100).toInt()}%",
-                    color = MaterialTheme.colorScheme.onBackground)
-                Slider(
+                PreferenceSlider(
                     value = settings.textScale,
-                    onValueChange = vm::setTextScale,
-                    valueRange = 0.85f..1.5f
-                )
+                    valueRange = 0.85f..1.5f,
+                    onCommit = vm::setTextScale
+                ) { live ->
+                    Text("Text size: ${(live * 100).toInt()}%",
+                        color = MaterialTheme.colorScheme.onBackground)
+                }
             }
         }
 
