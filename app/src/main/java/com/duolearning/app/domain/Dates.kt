@@ -19,6 +19,15 @@ object Dates {
     fun monthOf(day: Long): Int = epochDayToLocalDate(day).monthValue
 
     /**
+     * Epoch-day of the Monday that starts the week containing [day].
+     * Used to line a day grid up on real calendar weeks.
+     */
+    fun startOfWeek(day: Long): Long {
+        val date = epochDayToLocalDate(day)
+        return date.minusDays((date.dayOfWeek.value - 1).toLong()).toEpochDay()
+    }
+
+    /**
      * Two-letter weekday label (Mo, Tu, We, Th, Fr, Sa, Su) for [day].
      *
      * Single initials are ambiguous - Tuesday and Thursday both start with

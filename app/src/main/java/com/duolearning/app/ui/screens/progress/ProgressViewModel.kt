@@ -56,10 +56,17 @@ class ProgressViewModel(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProgressUiState())
 
-    /** Last [days] calendar days as a set of epoch-days that qualified. */
-    fun calendarWindow(days: Int = 35): List<Long> {
-        val today = Dates.todayEpochDay()
-        return (0 until days).map { today - (days - 1 - it) }
+    /**
+     * [weeks] whole calendar weeks (Monday first) ending with the week that
+     * contains today, as a flat list of epoch-days.
+     *
+     * The grid draws seven cells per row, so the window has to start on a
+     * Monday; a plain "last 35 days" window drifts one cell per day and the
+     * columns stop meaning the same weekday.
+     */
+    fun calendarWindow(weeks: Int = 5): List<Long> {
+        val firstWeekStart = Dates.startOfWeek(Dates.todayEpochDay()) - (weeks - 1) * 7
+        return (0 until weeks * 7).map { firstWeekStart + it }
     }
 
     companion object {

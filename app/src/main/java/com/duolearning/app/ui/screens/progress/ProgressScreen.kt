@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -97,12 +98,27 @@ fun ProgressScreen(
         item { SectionHeader("Learning calendar") }
         item {
             DuoCard(Modifier.fillMaxWidth()) {
-                // 7 columns x 5 rows of days.
+                // Weekday header, then 7 columns x 5 whole weeks of days.
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Dates.shortWeekdays.forEach { label ->
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = DuoGrey,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
                 window.chunked(7).forEach { week ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         week.forEach { day ->
                             val done = day in qualifiedDays
                             val isToday = day == today
+                            // Days still to come are drawn as plain cells so
+                            // the grid reads as a calendar, not as data loss.
+                            val isFuture = day > today
                             Box(
                                 Modifier.weight(1f).height(30.dp).clip(RoundedCornerShape(8.dp))
                                     .background(if (done) DuoGreen.copy(alpha = 0.85f) else DuoSurfaceHigh)
@@ -116,7 +132,11 @@ fun ProgressScreen(
                                 Text(
                                     "${Dates.dayOfMonth(day)}",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = if (done) MaterialTheme.colorScheme.onPrimary else DuoGrey
+                                    color = when {
+                                        done -> MaterialTheme.colorScheme.onPrimary
+                                        isFuture -> DuoGrey.copy(alpha = 0.45f)
+                                        else -> DuoGrey
+                                    }
                                 )
                             }
                         }
