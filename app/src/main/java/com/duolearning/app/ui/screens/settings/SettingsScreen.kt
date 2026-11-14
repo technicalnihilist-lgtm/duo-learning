@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.duolearning.app.BuildConfig
 import com.duolearning.app.data.content.LanguageCatalog
 import com.duolearning.app.ui.components.DuoCard
 import com.duolearning.app.ui.components.SectionHeader
@@ -205,7 +206,7 @@ fun SettingsScreen(
 
         item {
             Text(
-                "Duo Learning 1.0.0  ·  Offline-first, account-free language learning.",
+                "Duo Learning ${BuildConfig.VERSION_NAME}  ·  Offline-first, account-free language learning.",
                 style = MaterialTheme.typography.labelSmall, color = DuoGrey,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
