@@ -82,6 +82,17 @@ object LanguageCatalog {
     fun requireByCode(code: String): Language =
         byCode[code] ?: error("Unknown language code: $code")
 
+    /**
+     * Readable name for a stored language code, for lists that show history or
+     * saved rows. Falls back to the code itself for anything unknown, so a row
+     * is never blank.
+     */
+    fun displayName(code: String): String = when (code) {
+        "auto" -> "Detected"
+        "und" -> "Unknown"
+        else -> byCode[code]?.englishName ?: code
+    }
+
     fun search(query: String): List<Language> {
         val q = query.trim().lowercase()
         if (q.isEmpty()) return languages

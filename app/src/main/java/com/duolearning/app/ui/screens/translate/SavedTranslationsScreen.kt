@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.duolearning.app.data.content.LanguageCatalog
 import com.duolearning.app.ui.LocalContainer
 import com.duolearning.app.ui.components.EmptyState
 import com.duolearning.app.ui.theme.DuoGreen
@@ -88,8 +89,11 @@ fun SavedTranslationsScreen(
                             style = MaterialTheme.typography.bodyMedium)
                         Text(row.targetText, color = DuoGreen,
                             style = MaterialTheme.typography.bodyLarge)
-                        Text("${row.sourceLang} → ${row.targetLang}",
-                            color = DuoGrey, style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            "${LanguageCatalog.displayName(row.sourceLang)} → " +
+                                LanguageCatalog.displayName(row.targetLang),
+                            color = DuoGrey, style = MaterialTheme.typography.labelSmall
+                        )
                     }
                     IconButton(onClick = { tts.speak(row.targetText, row.targetLang) }) {
                         Icon(Icons.Filled.VolumeUp, "Speak", tint = DuoGreen)

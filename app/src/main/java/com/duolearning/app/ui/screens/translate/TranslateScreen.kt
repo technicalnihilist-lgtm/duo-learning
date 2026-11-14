@@ -289,8 +289,11 @@ private fun HistoryRow(
             Text(row.sourceText, color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium, maxLines = 2)
             Text(row.targetText, color = DuoGrey, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
-            Text("${row.sourceLang} → ${row.targetLang}",
-                color = DuoGrey, style = MaterialTheme.typography.labelSmall)
+            Text(
+                "${LanguageCatalog.displayName(row.sourceLang)} → " +
+                    LanguageCatalog.displayName(row.targetLang),
+                color = DuoGrey, style = MaterialTheme.typography.labelSmall
+            )
         }
         IconButton(onClick = onSpeak) { Icon(Icons.Filled.VolumeUp, "Speak", tint = DuoGreen) }
         IconButton(onClick = onCopy) { Icon(Icons.Filled.ContentCopy, "Copy", tint = DuoGrey) }
