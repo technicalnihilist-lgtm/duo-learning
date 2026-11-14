@@ -16,7 +16,17 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class PracticeMode { FLASHCARDS, DIFFICULT, SAVED_TRANSLATIONS }
+enum class PracticeMode(val routeValue: String) {
+    FLASHCARDS("flashcards"),
+    DIFFICULT("difficult"),
+    SAVED_TRANSLATIONS("saved");
+
+    companion object {
+        /** Mode requested through the practice route, or null for the menu. */
+        fun fromRoute(value: String?): PracticeMode? =
+            entries.firstOrNull { it.routeValue == value }
+    }
+}
 
 data class PracticeCard(
     val id: String,

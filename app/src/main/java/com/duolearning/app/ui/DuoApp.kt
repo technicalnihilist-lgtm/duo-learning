@@ -54,6 +54,7 @@ import com.duolearning.app.ui.navigation.Routes
 import com.duolearning.app.ui.screens.home.HomeScreen
 import com.duolearning.app.ui.screens.language.LanguagePickerScreen
 import com.duolearning.app.ui.screens.learn.LessonScreen
+import com.duolearning.app.ui.screens.practice.PracticeMode
 import com.duolearning.app.ui.screens.practice.PracticeScreen
 import com.duolearning.app.ui.screens.progress.ProgressScreen
 import com.duolearning.app.ui.screens.settings.OfflinePacksScreen
@@ -68,7 +69,7 @@ private data class Tab(val route: String, val label: String, val icon: ImageVect
 private val tabs = listOf(
     Tab(Routes.HOME, "Learn", Icons.Filled.School),
     Tab(Routes.TRANSLATE, "Translate", Icons.Filled.Translate),
-    Tab(Routes.PRACTICE, "Practice", Icons.Filled.Style),
+    Tab(Routes.PRACTICE_TAB, "Practice", Icons.Filled.Style),
     Tab(Routes.PROGRESS, "Progress", Icons.Filled.Insights)
 )
 
@@ -87,8 +88,10 @@ fun DuoApp() {
         container.tts.setSoundEnabled(settings.soundEnabled)
     }
     val backStackEntry by nav.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
-    val showBar = currentRoute in tabs.map { it.route }
+    // Destinations may carry an optional query arg ("practice?mode={mode}"),
+    // so match tabs on the path only.
+    val currentRoute = backStackEntry?.destination?.route?.substringBefore('?')
+    val showBar = currentRoute != null && tabs.any { it.route == currentRoute }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -107,7 +110,8 @@ fun DuoApp() {
                 HomeScreen(
                     onStartLesson = { course, lessonId -> nav.navigate(Routes.lesson(course, lessonId)) },
                     onOpenTranslate = { nav.switchTab(Routes.TRANSLATE) },
-                    onOpenPractice = { nav.switchTab(Routes.PRACTICE) },
+                    onOpenPractice = { nav.switchTab(Routes.PRACTICE_TAB) },
+                    onOpenVocabulary = { nav.navigate(Routes.practice("flashcards")) },
                     onOpenSettings = { nav.navigate(Routes.SETTINGS) },
                     onChooseCourse = { nav.navigate(Routes.languagePicker("learn")) }
                 )
@@ -119,11 +123,17 @@ fun DuoApp() {
                     onStartLesson = { course, lessonId -> nav.navigate(Routes.lesson(course, lessonId)) }
                 )
             }
-            composable(Routes.PRACTICE) {
+            composable(
+                route = Routes.PRACTICE,
+                arguments = listOf(navArgument(Routes.ARG_MODE) {
+                    type = NavType.StringType; defaultValue = ""
+                })
+            ) { entry ->
                 PracticeScreen(
                     onStartLesson = { course, lessonId -> nav.navigate(Routes.lesson(course, lessonId)) },
                     onOpenSaved = { nav.navigate(Routes.SAVED) },
-                    onChooseCourse = { nav.navigate(Routes.languagePicker("learn")) }
+                    onChooseCourse = { nav.navigate(Routes.languagePicker("learn")) },
+                    initialMode = PracticeMode.fromRoute(entry.arguments?.getString(Routes.ARG_MODE))
                 )
             }
             composable(Routes.PROGRESS) {
@@ -143,7 +153,7 @@ fun DuoApp() {
             composable(Routes.SAVED) {
                 SavedTranslationsScreen(
                     onBack = { nav.popBackStack() },
-                    onPractice = { nav.switchTab(Routes.PRACTICE) }
+                    onPractice = { nav.navigate(Routes.practice("saved")) }
                 )
             }
             composable(

@@ -78,6 +78,7 @@ fun HomeScreen(
     onStartLesson: (String, String) -> Unit,
     onOpenTranslate: () -> Unit,
     onOpenPractice: () -> Unit,
+    onOpenVocabulary: () -> Unit,
     onOpenSettings: () -> Unit,
     onChooseCourse: () -> Unit,
     vm: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
@@ -157,7 +158,7 @@ fun HomeScreen(
                     QuickAction("Practice", Icons.Filled.FitnessCenter, DuoPurple, Modifier.weight(1f), onOpenPractice)
                     QuickAction(
                         "Vocabulary", Icons.Filled.MenuBook, DuoCyan, Modifier.weight(1f),
-                        onOpenPractice
+                        onOpenVocabulary
                     )
                 }
             }

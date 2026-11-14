@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,10 +50,19 @@ fun PracticeScreen(
     onStartLesson: (String, String) -> Unit,
     onOpenSaved: () -> Unit,
     onChooseCourse: () -> Unit,
+    initialMode: PracticeMode? = null,
     vm: PracticeViewModel = viewModel(factory = PracticeViewModel.Factory)
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val savedCount by vm.savedCount.collectAsStateWithLifecycle()
+
+    // A shortcut (the home Vocabulary tile) can ask for a specific session; do
+    // it once, and never on top of a session that is already running.
+    LaunchedEffect(initialMode) {
+        val requested = initialMode ?: return@LaunchedEffect
+        val current = vm.state.value
+        if (!current.active && !current.finished) vm.start(requested)
+    }
 
     when {
         state.finished -> PracticeResults(state) { vm.exit() }

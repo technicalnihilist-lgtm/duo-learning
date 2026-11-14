@@ -4,7 +4,18 @@ package com.duolearning.app.ui.navigation
 object Routes {
     const val HOME = "home"
     const val TRANSLATE = "translate"
-    const val PRACTICE = "practice"
+
+    /** The plain practice tab route, used by the bottom bar. */
+    const val PRACTICE_TAB = "practice"
+
+    /**
+     * The practice destination. The mode query arg is optional, so the tab can
+     * still navigate to plain "practice", while a shortcut can ask for a
+     * specific session (e.g. the home Vocabulary tile).
+     */
+    const val PRACTICE = "practice?mode={mode}"
+    fun practice(mode: String) = "practice?mode=$mode"
+
     const val PROGRESS = "progress"
     const val SETTINGS = "settings"
     const val SAVED = "saved"
