@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.duolearning.app.data.model.ExerciseSpec
+import com.duolearning.app.domain.Achievements
 import com.duolearning.app.ui.LocalContainer
 import com.duolearning.app.ui.components.Tag
 import com.duolearning.app.ui.theme.DuoGreen
@@ -314,8 +315,12 @@ private fun LessonResults(
         if (!result?.unlockedAchievements.isNullOrEmpty()) {
             Spacer(Modifier.height(16.dp))
             Text("Achievements unlocked", color = MaterialTheme.colorScheme.onBackground)
-            result.unlockedAchievements.forEach {
-                Text("· ${it.replace('_', ' ')}", color = DuoGrey)
+            result.unlockedAchievements.forEach { id ->
+                // Show the achievement's own title; the stored id (e.g.
+                // "first_lesson") is an internal key, not something to show.
+                val title = Achievements.all.firstOrNull { it.id == id }?.title
+                    ?: id.replace('_', ' ')
+                Text("· $title", color = DuoGrey)
             }
         }
         Spacer(Modifier.height(28.dp))
