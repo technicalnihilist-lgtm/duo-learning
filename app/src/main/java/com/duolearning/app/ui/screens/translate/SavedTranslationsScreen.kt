@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.duolearning.app.data.content.LanguageCatalog
-import com.duolearning.app.ui.LocalContainer
 import com.duolearning.app.ui.components.EmptyState
+import com.duolearning.app.ui.components.rememberSpeaker
 import com.duolearning.app.ui.theme.DuoGreen
 import com.duolearning.app.ui.theme.DuoGrey
 import com.duolearning.app.ui.theme.DuoSurface
@@ -50,7 +50,7 @@ fun SavedTranslationsScreen(
     vm: TranslateViewModel = viewModel(factory = TranslateViewModel.Factory)
 ) {
     val saved by vm.saved.collectAsStateWithLifecycle()
-    val tts = LocalContainer.current.tts
+    val speak = rememberSpeaker()
 
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -95,7 +95,7 @@ fun SavedTranslationsScreen(
                             color = DuoGrey, style = MaterialTheme.typography.labelSmall
                         )
                     }
-                    IconButton(onClick = { tts.speak(row.targetText, row.targetLang) }) {
+                    IconButton(onClick = { speak(row.targetText, row.targetLang) }) {
                         Icon(Icons.Filled.VolumeUp, "Speak", tint = DuoGreen)
                     }
                     IconButton(onClick = { vm.setSavedFavourite(row.id, !row.favourite) }) {

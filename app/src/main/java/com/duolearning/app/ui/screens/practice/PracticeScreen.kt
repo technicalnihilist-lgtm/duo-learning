@@ -35,8 +35,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.duolearning.app.ui.LocalContainer
 import com.duolearning.app.ui.components.DuoCard
+import com.duolearning.app.ui.components.rememberSpeaker
 import com.duolearning.app.ui.theme.DuoBlue
 import com.duolearning.app.ui.theme.DuoGreen
 import com.duolearning.app.ui.theme.DuoGrey
@@ -118,7 +118,7 @@ private fun PracticeOption(title: String, subtitle: String, accent: androidx.com
 @Composable
 private fun PracticeSession(state: PracticeUiState, vm: PracticeViewModel) {
     val card = state.current ?: return
-    val tts = LocalContainer.current.tts
+    val speak = rememberSpeaker()
 
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -138,7 +138,7 @@ private fun PracticeSession(state: PracticeUiState, vm: PracticeViewModel) {
                 Text(card.front, style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(8.dp))
-                IconButton(onClick = { tts.speak(card.front, card.frontLang) }) {
+                IconButton(onClick = { speak(card.front, card.frontLang) }) {
                     Icon(Icons.Filled.VolumeUp, "Speak", tint = DuoGreen)
                 }
                 if (state.revealed) {

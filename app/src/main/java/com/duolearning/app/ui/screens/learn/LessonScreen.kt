@@ -39,8 +39,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.duolearning.app.data.model.ExerciseSpec
 import com.duolearning.app.domain.Achievements
-import com.duolearning.app.ui.LocalContainer
 import com.duolearning.app.ui.components.Tag
+import com.duolearning.app.ui.components.rememberSpeaker
 import com.duolearning.app.ui.theme.DuoGreen
 import com.duolearning.app.ui.theme.DuoGrey
 import com.duolearning.app.ui.theme.DuoRed
@@ -107,14 +107,14 @@ fun LessonScreen(
 
 @Composable
 private fun ExerciseBody(state: LessonUiState, ex: ExerciseSpec, vm: LessonViewModel) {
-    val tts = LocalContainer.current.tts
+    val speak = rememberSpeaker()
     when (ex) {
         is ExerciseSpec.MultipleChoice, is ExerciseSpec.FillBlank, is ExerciseSpec.Listening,
         is ExerciseSpec.Correction -> {
             if (ex is ExerciseSpec.Listening) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = {
-                        tts.speak(ex.spoken, state.courseLanguage?.code ?: "en")
+                        speak(ex.spoken, state.courseLanguage?.code ?: "en")
                     }) {
                         Icon(Icons.Filled.VolumeUp, contentDescription = "Play audio", tint = DuoGreen)
                     }

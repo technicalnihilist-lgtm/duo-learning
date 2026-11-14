@@ -8,6 +8,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
 
+/** What happened when the app tried to speak something. */
+enum class SpeakOutcome {
+    /** The utterance was handed to the engine. */
+    SPOKEN,
+    /** The user turned pronunciation audio off. */
+    MUTED,
+    /** The engine has not finished initialising (or is missing). */
+    NOT_READY,
+    /** No installed voice can speak the requested language. */
+    NO_VOICE,
+    /** There was nothing to say. */
+    EMPTY
+}
+
 /**
  * Thin wrapper over Android's [TextToSpeech] engine.
  *
@@ -67,21 +81,26 @@ class TtsManager(context: Context) {
     }
 
     /**
-     * Speak [text]. Returns false when no engine or no voice is available, so
-     * the caller can surface a helpful message rather than doing nothing.
+     * Speak [text]. The outcome says why nothing was heard - muted sound, an
+     * engine that is still initialising, or a language with no installed
+     * voice - so the caller can surface a helpful message rather than leaving
+     * the user with a dead button.
      */
-    fun speak(text: String, languageCode: String): Boolean {
-        if (!soundEnabled) return false
-        val engine = tts ?: return false
-        if (text.isBlank()) return false
+    fun speak(text: String, languageCode: String): SpeakOutcome {
+        if (!soundEnabled) return SpeakOutcome.MUTED
+        val engine = tts ?: return SpeakOutcome.NOT_READY
+        if (text.isBlank()) return SpeakOutcome.EMPTY
+        // Calls made before initialisation finishes are dropped by the
+        // platform engine, so report that instead of pretending to speak.
+        if (!_ready.value) return SpeakOutcome.NOT_READY
         val locale = Locale.forLanguageTag(languageCode)
         val result = engine.setLanguage(locale)
         if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-            return false
+            return SpeakOutcome.NO_VOICE
         }
         engine.setSpeechRate(speechRate)
         engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, "duo-${System.nanoTime()}")
-        return true
+        return SpeakOutcome.SPOKEN
     }
 
     fun stop() {

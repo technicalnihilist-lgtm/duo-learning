@@ -47,9 +47,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.duolearning.app.data.content.LanguageCatalog
 import com.duolearning.app.data.local.entity.TranslationHistoryEntity
-import com.duolearning.app.ui.LocalContainer
 import com.duolearning.app.ui.components.DuoCard
 import com.duolearning.app.ui.components.SectionHeader
+import com.duolearning.app.ui.components.rememberSpeaker
 import com.duolearning.app.ui.components.Tag
 import com.duolearning.app.ui.theme.DuoBlue
 import com.duolearning.app.ui.theme.DuoGreen
@@ -68,7 +68,7 @@ fun TranslateScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val history by vm.history.collectAsStateWithLifecycle()
     val saved by vm.saved.collectAsStateWithLifecycle()
-    val tts = LocalContainer.current.tts
+    val speak = rememberSpeaker()
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
 
@@ -168,7 +168,7 @@ fun TranslateScreen(
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         IconButton(onClick = {
-                            tts.speak(result, state.target)
+                            speak(result, state.target)
                         }) { Icon(Icons.Filled.VolumeUp, "Speak translation", tint = DuoGreen) }
                         IconButton(onClick = { clipboard.setText(AnnotatedString(result)) }) {
                             Icon(Icons.Filled.ContentCopy, "Copy", tint = DuoGrey)
@@ -221,7 +221,7 @@ fun TranslateScreen(
             item { SectionHeader("Recent") { Text("", color = DuoGrey) } }
             items(history, key = { it.id }) { row ->
                 HistoryRow(row, onCopy = { clipboard.setText(AnnotatedString(row.targetText)) },
-                    onSpeak = { tts.speak(row.targetText, row.targetLang) },
+                    onSpeak = { speak(row.targetText, row.targetLang) },
                     onDelete = { vm.deleteHistory(row.id) })
             }
         }
