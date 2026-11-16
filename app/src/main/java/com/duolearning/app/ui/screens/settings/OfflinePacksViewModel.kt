@@ -30,7 +30,9 @@ class OfflinePacksViewModel(
 
     init { refresh() }
 
-    fun refresh() = viewModelScope.launch {
+    fun refresh() = viewModelScope.launch { loadPacks() }
+
+    private suspend fun loadPacks() {
         val rows = LanguageCatalog.translatable.map { lang ->
             PackRow(
                 code = lang.code, name = lang.englishName, nativeName = lang.nativeName,
@@ -42,18 +44,22 @@ class OfflinePacksViewModel(
 
     fun download(code: String) = viewModelScope.launch {
         setBusy(code, true, "Downloading…")
-        when (val r = translation.ensureModel(code)) {
-            is ModelDownloadState.Done -> setBusy(code, false, "Ready offline")
-            is ModelDownloadState.AlreadyDownloaded -> setBusy(code, false, "Already installed")
-            is ModelDownloadState.Downloading -> setBusy(code, true, "Downloading…")
-            is ModelDownloadState.Failed -> setBusy(code, false, r.message)
+        val (busy, message) = when (val r = translation.ensureModel(code)) {
+            is ModelDownloadState.Done -> false to "Ready offline"
+            is ModelDownloadState.AlreadyDownloaded -> false to "Already installed"
+            is ModelDownloadState.Downloading -> true to "Downloading…"
+            is ModelDownloadState.Failed -> false to r.message
         }
-        refresh()
+        // Rebuild the rows first and apply the outcome afterwards. The other
+        // way round the refresh replaced every row - message included - so a
+        // finished download or a failure never showed anything.
+        loadPacks()
+        setBusy(code, busy, message)
     }
 
     fun delete(code: String) = viewModelScope.launch {
         translation.deleteModel(code)
-        refresh()
+        loadPacks()
     }
 
     private fun setBusy(code: String, busy: Boolean, message: String?) {
