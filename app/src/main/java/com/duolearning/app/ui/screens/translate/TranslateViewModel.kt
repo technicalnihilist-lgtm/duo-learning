@@ -51,6 +51,13 @@ class TranslateViewModel(
 
     private var translateJob: Job? = null
 
+    /**
+     * Monotonic id of the newest request. Every result is checked against it
+     * before it is written to the UI, so a slow request for old input can
+     * never overwrite the answer for what is on screen now.
+     */
+    private var requestId = 0
+
     init {
         viewModelScope.launch {
             val s = learning.currentSettings()
@@ -74,34 +81,64 @@ class TranslateViewModel(
         }
     }
 
-    fun setSource(code: String) = _state.update { it.copy(source = code, result = null, detected = null) }
-    fun setTarget(code: String) = _state.update { it.copy(target = code, result = null, detected = null) }
+    /**
+     * Drop the request that is in flight (if any) together with the result it
+     * would have produced. Called by every edit that changes what a pending
+     * translation was asked for.
+     */
+    private fun invalidatePending() {
+        translateJob?.cancel()
+        translateJob = null
+        requestId++
+    }
+
+    fun setSource(code: String) {
+        invalidatePending()
+        _state.update { it.copy(source = code, result = null, detected = null, loading = false) }
+    }
+
+    fun setTarget(code: String) {
+        invalidatePending()
+        _state.update { it.copy(target = code, result = null, detected = null, loading = false) }
+    }
 
     /**
      * Editing the input invalidates whatever translation is on screen: keeping
      * it would show a result for text the user has already changed, and would
      * let them save or copy the wrong pairing.
      */
-    fun setText(value: String) = _state.update {
-        it.copy(text = value, result = null, detected = null, savedJustNow = false)
+    fun setText(value: String) {
+        invalidatePending()
+        _state.update {
+            it.copy(text = value, result = null, detected = null, savedJustNow = false, loading = false)
+        }
     }
 
-    fun swap() = _state.update {
-        val newSource = it.target
-        val newTarget = if (it.source == "auto") (it.detected ?: "en") else it.source
-        it.copy(
-            source = newSource, target = newTarget,
-            text = it.resultText ?: it.text,
-            result = null, detected = null, savedJustNow = false
-        )
+    fun swap() {
+        invalidatePending()
+        _state.update {
+            val newSource = it.target
+            val newTarget = if (it.source == "auto") (it.detected ?: "en") else it.source
+            it.copy(
+                source = newSource, target = newTarget,
+                text = it.resultText ?: it.text,
+                result = null, detected = null, savedJustNow = false, loading = false
+            )
+        }
     }
 
-    fun clear() = _state.update {
-        it.copy(text = "", result = null, detected = null, savedJustNow = false)
+    fun clear() {
+        invalidatePending()
+        _state.update {
+            it.copy(text = "", result = null, detected = null, savedJustNow = false, loading = false)
+        }
     }
 
-    fun append(text: String) = _state.update {
-        it.copy(text = it.text + text, result = null, detected = null, savedJustNow = false)
+    fun append(text: String) {
+        invalidatePending()
+        _state.update {
+            it.copy(text = it.text + text, result = null, detected = null, savedJustNow = false, loading = false)
+        }
     }
 
     /**
@@ -112,21 +149,25 @@ class TranslateViewModel(
     fun translate() {
         val s = _state.value
         if (s.text.isBlank()) return
-        translateJob?.cancel()
+        invalidatePending()
+        val id = requestId
         _state.update { it.copy(loading = true, result = null, savedJustNow = false) }
         translateJob = viewModelScope.launch {
             try {
                 if (s.source == "auto") {
                     val detected = translation.detect(s.text)
+                    if (id != requestId) return@launch
                     _state.update { it.copy(detected = detected) }
                 } else {
                     _state.update { it.copy(detected = s.source) }
                 }
                 val result = translation.translate(s.text, s.source, s.target)
+                if (id != requestId) return@launch
                 _state.update { it.copy(loading = false, result = result) }
             } catch (c: CancellationException) {
                 throw c
             } catch (t: Throwable) {
+                if (id != requestId) return@launch
                 // Never leave the spinner running on an unexpected failure.
                 _state.update {
                     it.copy(
