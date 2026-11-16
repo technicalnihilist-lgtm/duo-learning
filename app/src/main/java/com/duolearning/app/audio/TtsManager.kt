@@ -99,8 +99,11 @@ class TtsManager(context: Context) {
             return SpeakOutcome.NO_VOICE
         }
         engine.setSpeechRate(speechRate)
-        engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, "duo-${System.nanoTime()}")
-        return SpeakOutcome.SPOKEN
+        val queued = engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, "duo-${System.nanoTime()}")
+        // speak() returns ERROR when the engine could not take the utterance
+        // (typically because it is still starting up). Reporting SPOKEN anyway
+        // made the button look dead with no explanation.
+        return if (queued == TextToSpeech.SUCCESS) SpeakOutcome.SPOKEN else SpeakOutcome.NOT_READY
     }
 
     fun stop() {
