@@ -48,7 +48,9 @@ data class PracticeUiState(
     val correct: Int = 0,
     val finished: Boolean = false,
     val result: ActivityResult? = null,
-    val emptyMessage: String? = null
+    val emptyMessage: String? = null,
+    /** Set when a grade could not be stored; the session stays on the card. */
+    val saveError: String? = null
 ) {
     val current: PracticeCard? get() = cards.getOrNull(index)
     val total: Int get() = cards.size
@@ -153,11 +155,19 @@ class PracticeViewModel(
                         qualifying = true
                     )
                     _state.update {
-                        it.copy(correct = newCorrect, finished = true, result = result)
+                        it.copy(correct = newCorrect, finished = true, result = result, saveError = null)
                     }
                 } else {
-                    _state.update { it.copy(index = nextIndex, correct = newCorrect, revealed = false) }
+                    _state.update {
+                        it.copy(index = nextIndex, correct = newCorrect, revealed = false, saveError = null)
+                    }
                 }
+            } catch (c: kotlinx.coroutines.CancellationException) {
+                throw c
+            } catch (t: Throwable) {
+                // An exception escaping this launch used to crash the app and
+                // leave the card half-graded. Keep the session usable instead.
+                _state.update { it.copy(saveError = "Couldn't save that answer. Try again.") }
             } finally {
                 grading = false
             }

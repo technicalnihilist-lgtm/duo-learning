@@ -168,6 +168,10 @@ private fun PracticeSession(state: PracticeUiState, vm: PracticeViewModel) {
             }
         }
 
+        state.saveError?.let { message ->
+            Text(message, color = DuoRed, style = MaterialTheme.typography.bodyMedium)
+        }
+
         if (!state.revealed) {
             Button(
                 onClick = { vm.reveal() },
