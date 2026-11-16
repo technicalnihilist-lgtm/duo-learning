@@ -32,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
@@ -194,7 +193,12 @@ fun DuoApp() {
 private fun DuoBottomBar(nav: NavHostController, currentRoute: String?) {
     val shape = RoundedCornerShape(28.dp)
     BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-        val tabW = maxWidth / tabs.size
+        // The tab row insets its children by 6.dp on each side, so the tabs are
+        // narrower than maxWidth / count and start 6.dp in. Ignoring that made
+        // the highlight wider than its tab and drift further out with every
+        // tab to the right.
+        val barInset = 6.dp
+        val tabW = (maxWidth - barInset - barInset) / tabs.size.toFloat()
         val idx = tabs.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
         val fx by LocalContainer.current.preferences.settings
             .collectAsStateWithLifecycle(initialValue = UserSettings())
@@ -208,14 +212,14 @@ private fun DuoBottomBar(nav: NavHostController, currentRoute: String?) {
             )
         }
         val lensX by animateDpAsState(
-            targetValue = tabW * idx,
+            targetValue = tabW * idx.toFloat(),
             animationSpec = lensSpec,
             label = "lens"
         )
         // Sliding highlight that travels to the selected tab.
         Box(
             Modifier
-                .offset(x = lensX)
+                .offset(x = lensX + barInset)
                 .width(tabW)
                 .height(64.dp)
                 .padding(horizontal = 8.dp, vertical = 10.dp)
