@@ -74,7 +74,12 @@ fun LessonScreen(
             IconButton(onClick = onExit) {
                 Icon(Icons.Filled.Close, contentDescription = "Close lesson", tint = DuoGrey)
             }
-            val frac = if (state.total == 0) 0f else state.index.toFloat() / state.total
+            // Count the exercise that has just been answered, so the bar
+            // actually reaches 100% on the last one. Using the bare index left
+            // the bar on 0% during the first exercise and never full before
+            // the results screen.
+            val frac = if (state.total == 0) 0f
+            else (state.index + if (state.checked) 1 else 0).toFloat() / state.total
             LinearProgressIndicator(
                 progress = { frac },
                 modifier = Modifier.weight(1f).height(10.dp).clip(RoundedCornerShape(50)),
