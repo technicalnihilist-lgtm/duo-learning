@@ -140,7 +140,15 @@ class LessonViewModel(
 
     fun selectLeft(token: String) = _state.update { s ->
         if (s.checked) return@update s
-        s.copy(selectedLeft = if (s.selectedLeft == token) null else token)
+        // Tapping a word that is already paired unmakes that pair. Without
+        // this a single mis-tap left the exercise impossible to finish: the
+        // right-hand item stayed used, and only the left item could be
+        // re-selected.
+        if (s.matches.containsKey(token)) {
+            s.copy(matches = s.matches - token, selectedLeft = null)
+        } else {
+            s.copy(selectedLeft = if (s.selectedLeft == token) null else token)
+        }
     }
 
     fun matchRight(token: String) = _state.update { s ->
