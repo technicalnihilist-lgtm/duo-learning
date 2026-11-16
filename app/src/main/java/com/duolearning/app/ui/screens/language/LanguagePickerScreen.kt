@@ -100,6 +100,38 @@ fun LanguagePickerScreen(
                 style = MaterialTheme.typography.labelSmall, color = DuoGrey
             )
         }
+        // The translator supports "auto" as a source, but it was not offered
+        // anywhere in the picker, so once a concrete source language had been
+        // chosen there was no way back to detection.
+        if (mode == "source") {
+            item {
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                        .background(DuoSurface)
+                        .border(1.dp, DuoSurfaceHigh, RoundedCornerShape(14.dp))
+                        .clickable {
+                            bus.publish(mode, "auto")
+                            onPicked()
+                        }
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            "Detect language",
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            "Let the app work out what the text is",
+                            color = DuoGrey, style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                    Tag("Auto", DuoGreen)
+                }
+            }
+        }
+
         items(all, key = { it.code }) { lang ->
             val enabled = selectable(lang)
             Row(
