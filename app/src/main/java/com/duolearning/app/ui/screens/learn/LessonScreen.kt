@@ -260,6 +260,10 @@ private fun FeedbackAndAction(state: LessonUiState, vm: LessonViewModel) {
     Column(
         Modifier.fillMaxWidth().background(DuoSurface).padding(16.dp)
     ) {
+        state.saveError?.let { message ->
+            Text(message, color = DuoRed, style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(6.dp))
+        }
         if (state.checked) {
             Text(
                 if (state.isCorrect) "Correct" else "Not quite",

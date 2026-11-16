@@ -45,7 +45,9 @@ data class LessonUiState(
     val finished: Boolean = false,
     val result: ActivityResult? = null,
     val nextLessonId: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    /** Set when the finished attempt could not be written to the database. */
+    val saveError: String? = null
 ) {
     val accuracy: Int get() = if (total == 0) 0 else (correctCount * 100) / total
 }
@@ -216,17 +218,32 @@ class LessonViewModel(
     private fun finishAttempt() = viewModelScope.launch {
         val s = _state.value
         val found = lesson ?: return@launch
-        val result = learning.recordLessonResult(
-            courseCode = courseCode,
-            lessonId = lessonId,
-            correct = s.correctCount,
-            total = s.total,
-            isCheckpoint = s.isCheckpoint,
-            qualifying = true
-        )
-        // Feed lesson vocabulary into the spaced-repetition schedule.
+        val result = try {
+            learning.recordLessonResult(
+                courseCode = courseCode,
+                lessonId = lessonId,
+                correct = s.correctCount,
+                total = s.total,
+                isCheckpoint = s.isCheckpoint,
+                qualifying = true
+            )
+        } catch (c: kotlinx.coroutines.CancellationException) {
+            throw c
+        } catch (t: Throwable) {
+            // Without this the Continue button stayed disabled for good and the
+            // learner could never leave the finished exercise. Report it and
+            // allow another tap, which retries the write.
+            finishing = false
+            _state.update {
+                it.copy(saveError = "Couldn't save this attempt. Tap Continue to try again.")
+            }
+            return@launch
+        }
+        // Feed lesson vocabulary into the spaced-repetition schedule. This is
+        // best effort: the attempt itself is already stored, so a scheduling
+        // failure must not lose the result.
         val passed = result.passed
-        found.vocab.forEach { learning.reviewVocab(it.id, passed) }
+        found.vocab.forEach { runCatching { learning.reviewVocab(it.id, passed) } }
 
         // Only offer the next lesson when this one was actually passed; the
         // next lesson is still locked otherwise.
@@ -235,7 +252,9 @@ class LessonViewModel(
         } else {
             null
         }
-        _state.update { it.copy(finished = true, result = result, nextLessonId = nextId) }
+        _state.update {
+            it.copy(finished = true, result = result, nextLessonId = nextId, saveError = null)
+        }
     }
 
     companion object {
