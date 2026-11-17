@@ -104,9 +104,14 @@ class MlKitTranslationEngine : TranslationEngine {
             // surprise. Progress is coarse because ML Kit does not report
             // byte-level progress.
             val conditions = DownloadConditions.Builder().build()
+            // ML Kit rejects a translator whose source and target are the same
+            // language, so the English model cannot be requested as en -> en:
+            // that call threw and the English pack could never be downloaded.
+            // Any other supported language works as the pivot.
+            val pivot = if (code == "en") "hi" else "en"
             Translation.getClient(
                 TranslatorOptions.Builder()
-                    .setSourceLanguage("en")
+                    .setSourceLanguage(pivot)
                     .setTargetLanguage(code)
                     .build()
             ).use { client ->
