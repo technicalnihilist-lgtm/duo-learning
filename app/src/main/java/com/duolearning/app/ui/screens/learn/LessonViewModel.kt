@@ -239,11 +239,18 @@ class LessonViewModel(
             }
             return@launch
         }
-        // Feed lesson vocabulary into the spaced-repetition schedule. This is
-        // best effort: the attempt itself is already stored, so a scheduling
-        // failure must not lose the result.
+        // Feed lesson vocabulary into the spaced-repetition schedule, but only
+        // for a passed attempt. A lesson carries its whole unit's word list, so
+        // grading every word with the lesson-wide result meant one failed
+        // attempt marked words the learner was never asked about as badly
+        // known, and they all turned up in the Difficult-words drill. Left
+        // alone, those words simply stay due. Best effort either way: the
+        // attempt itself is already stored, so a scheduling failure must not
+        // lose the result.
         val passed = result.passed
-        found.vocab.forEach { runCatching { learning.reviewVocab(it.id, passed) } }
+        if (passed) {
+            found.vocab.forEach { runCatching { learning.reviewVocab(it.id, correct = true) } }
+        }
 
         // Only offer the next lesson when this one was actually passed; the
         // next lesson is still locked otherwise.
