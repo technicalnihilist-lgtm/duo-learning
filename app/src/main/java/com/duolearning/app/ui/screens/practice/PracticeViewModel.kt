@@ -111,6 +111,7 @@ class PracticeViewModel(
                 }
             }
         }
+        gradedIndex = -1
         _state.value = PracticeUiState(
             active = cards.isNotEmpty(),
             mode = mode,
@@ -131,6 +132,15 @@ class PracticeViewModel(
     /** Guards against a double tap grading the same card twice. */
     private var grading = false
 
+    /**
+     * Index of the card whose spaced-repetition grade was already stored.
+     *
+     * A failed save keeps the user on the same card so they can retry, and the
+     * retry used to run the SM-2 update a second time for that word, counting
+     * one answer twice. The index is reset whenever a session starts.
+     */
+    private var gradedIndex = -1
+
     /** Grade the current card; advances to the next or finishes the session. */
     fun grade(correct: Boolean) {
         val s = _state.value
@@ -141,7 +151,10 @@ class PracticeViewModel(
         grading = true
         viewModelScope.launch {
             try {
-                if (card.isVocab) learning.reviewVocab(card.id, correct)
+                if (card.isVocab && s.index != gradedIndex) {
+                    learning.reviewVocab(card.id, correct)
+                    gradedIndex = s.index
+                }
 
                 val nextIndex = s.index + 1
                 val newCorrect = s.correct + if (correct) 1 else 0
