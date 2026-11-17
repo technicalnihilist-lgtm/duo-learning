@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,12 @@ fun LessonScreen(
         return
     }
 
+    // The scroll state is shared by every exercise in the lesson, so it has to
+    // be reset when the next one is prepared: otherwise a long answer left the
+    // next prompt scrolled off the top of the screen.
+    val scroll = rememberScrollState()
+    LaunchedEffect(state.index) { scroll.scrollTo(0) }
+
     Column(Modifier.fillMaxSize()) {
         // Header: close + progress
         Row(
@@ -89,7 +96,7 @@ fun LessonScreen(
         }
 
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(scroll).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             if (state.error != null) {
