@@ -92,13 +92,16 @@ fun FxSheet(
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 28.dp)) {
+            // This sheet is not the Settings screen: it only holds the visual
+            // effects, and calling it "Settings" (with a Hindi subtitle in an
+            // otherwise English UI) made the two easy to confuse.
             Text(
-                "Settings",
+                "Visual effects",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                "Effects yahin se adjust karo",
+                "Tune how the app looks. Changes apply straight away.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = DuoGrey
             )
