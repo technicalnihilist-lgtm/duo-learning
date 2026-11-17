@@ -146,8 +146,8 @@ fun HomeScreen(
             item { DailyGoalCard(state) }
 
             item {
-                ContinueLearningCard(state, tilt) {
-                    state.nextLessonId?.let { onStartLesson(state.courseCode, it) }
+                ContinueLearningCard(state, tilt) { id ->
+                    onStartLesson(state.courseCode, id)
                 }
             }
 
@@ -341,11 +341,17 @@ private fun DailyGoalCard(state: HomeUiState) {
 }
 
 @Composable
-private fun ContinueLearningCard(state: HomeUiState, tilt: Float, onStart: () -> Unit) {
+private fun ContinueLearningCard(state: HomeUiState, tilt: Float, onStart: (String) -> Unit) {
     val unit = state.units.firstOrNull { u -> u.lessons.any { it.id == state.nextLessonId } }
     val lesson = unit?.lessons?.firstOrNull { it.id == state.nextLessonId }
     val done = state.units.sumOf { u -> u.lessons.count { it.completed } }
     val frac = if (state.totalLessons == 0) 0f else done.toFloat() / state.totalLessons
+    // With every lesson finished there is no "next" lesson, and the card used
+    // to fall back to "Start your first lesson" with a dead Resume button,
+    // telling a learner who had finished the course that they had not begun.
+    val allDone = state.totalLessons > 0 && done >= state.totalLessons
+    val targetId = state.nextLessonId
+        ?: if (allDone) state.units.lastOrNull()?.lessons?.lastOrNull()?.id else null
     val shape = RoundedCornerShape(26.dp)
 
     Box(
@@ -373,15 +379,23 @@ private fun ContinueLearningCard(state: HomeUiState, tilt: Float, onStart: () ->
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                unit?.let { "Unit: ${it.title}" } ?: "Start your first lesson",
+                when {
+                    allDone -> "Course complete"
+                    unit != null -> "Unit: ${unit.title}"
+                    else -> "Start your first lesson"
+                },
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                lesson?.let { "${it.title}  ·  ${it.kind.lowercase().replaceFirstChar { c -> c.uppercase() }}" }
-                    ?: "Pick a course to begin",
+                when {
+                    allDone -> "Every lesson is done — tap Review to go over one again"
+                    lesson != null ->
+                        "${lesson.title}  ·  ${lesson.kind.lowercase().replaceFirstChar { c -> c.uppercase() }}"
+                    else -> "Pick a course to begin"
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.80f)
             )
@@ -416,12 +430,16 @@ private fun ContinueLearningCard(state: HomeUiState, tilt: Float, onStart: () ->
                     .clip(RoundedCornerShape(50))
                     .background(Color.White.copy(alpha = 0.16f))
                     .border(1.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(50))
-                    .clickable(enabled = state.nextLessonId != null, onClick = onStart)
+                    .clickable(enabled = targetId != null) { targetId?.let(onStart) }
                     .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    if (state.completedLessons == 0) "Start" else "Resume",
+                    when {
+                        allDone -> "Review"
+                        state.completedLessons == 0 -> "Start"
+                        else -> "Resume"
+                    },
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
