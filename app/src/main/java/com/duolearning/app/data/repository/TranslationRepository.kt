@@ -73,15 +73,29 @@ class TranslationRepository(
         return result
     }
 
+    /**
+     * Save a translation for later study.
+     *
+     * Saving the same pair twice used to insert a second row, so tapping Save
+     * again (or saving the same phrase on a later day) filled the saved list
+     * and the saved-translation practice session with duplicates. The text is
+     * trimmed to match what was actually translated, and an existing row is
+     * returned instead of inserting a copy.
+     */
     suspend fun saveTranslation(
         source: String, target: String, sourceText: String, targetText: String
-    ): Long = db.translationDao().insertSaved(
-        SavedTranslationEntity(
-            sourceLang = source, targetLang = target,
-            sourceText = sourceText, targetText = targetText,
-            createdAt = System.currentTimeMillis()
+    ): Long {
+        val trimmed = sourceText.trim()
+        val existing = db.translationDao().findSaved(source, target, trimmed)
+        if (existing != null) return existing.id
+        return db.translationDao().insertSaved(
+            SavedTranslationEntity(
+                sourceLang = source, targetLang = target,
+                sourceText = trimmed, targetText = targetText,
+                createdAt = System.currentTimeMillis()
+            )
         )
-    )
+    }
 
     suspend fun deleteSaved(id: Long) = db.translationDao().deleteSaved(id)
     suspend fun setSavedFavourite(id: Long, fav: Boolean) = db.translationDao().setSavedFavourite(id, fav)

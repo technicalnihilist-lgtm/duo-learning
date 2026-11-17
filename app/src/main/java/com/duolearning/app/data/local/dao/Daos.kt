@@ -85,6 +85,9 @@ interface TranslationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSaved(entity: SavedTranslationEntity): Long
 
+    @Query("SELECT * FROM saved_translation WHERE sourceLang = :src AND targetLang = :tgt AND sourceText = :text LIMIT 1")
+    suspend fun findSaved(src: String, tgt: String, text: String): SavedTranslationEntity?
+
     @Query("DELETE FROM saved_translation WHERE id = :id")
     suspend fun deleteSaved(id: Long)
 
