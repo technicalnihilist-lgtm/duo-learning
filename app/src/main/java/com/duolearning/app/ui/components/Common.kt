@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,6 +72,16 @@ fun DuoLogo(size: Int = 34) {
     }
 }
 
+/**
+ * Opacity of the glass card fill, driven by the "Transparency" slider in the
+ * effects sheet.
+ *
+ * The slider used to be stored and then never read by anything, so moving it
+ * changed nothing on screen. 26% is the default and maps to the original 0.10
+ * fill, so the default look is unchanged while the slider now has an effect.
+ */
+val LocalGlassAlpha = staticCompositionLocalOf { 0.10f }
+
 /** Translucent "glass" surface: soft fill plus a light hairline border. */
 @Composable
 fun GlassCard(
@@ -79,8 +90,9 @@ fun GlassCard(
     content: @Composable () -> Unit
 ) {
     val shape = RoundedCornerShape(26.dp)
+    val alpha = LocalGlassAlpha.current
     val fill = Brush.verticalGradient(
-        listOf(Color.White.copy(alpha = 0.10f), Color.White.copy(alpha = 0.035f))
+        listOf(Color.White.copy(alpha = alpha), Color.White.copy(alpha = alpha * 0.35f))
     )
     val edge = Brush.linearGradient(
         listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.05f))

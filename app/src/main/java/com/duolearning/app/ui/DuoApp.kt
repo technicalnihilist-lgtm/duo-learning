@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,6 +50,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.duolearning.app.data.prefs.UserSettings
+import com.duolearning.app.ui.components.LocalGlassAlpha
 import com.duolearning.app.ui.navigation.Routes
 import com.duolearning.app.ui.screens.home.HomeScreen
 import com.duolearning.app.ui.screens.language.LanguagePickerScreen
@@ -92,6 +94,10 @@ fun DuoApp() {
     val currentRoute = backStackEntry?.destination?.route?.substringBefore('?')
     val showBar = currentRoute != null && tabs.any { it.route == currentRoute }
 
+    // The "Transparency" effect scales every glass surface in the app. It used
+    // to be stored but never read, so the slider did nothing.
+    val glassAlpha = (0.10f * (settings.transparencyPct / 26f)).coerceIn(0.02f, 0.30f)
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
@@ -100,6 +106,7 @@ fun DuoApp() {
             }
         }
     ) { padding ->
+        CompositionLocalProvider(LocalGlassAlpha provides glassAlpha) {
         NavHost(
             navController = nav,
             startDestination = Routes.HOME,
@@ -185,6 +192,7 @@ fun DuoApp() {
                     }
                 )
             }
+        }
         }
     }
 }
