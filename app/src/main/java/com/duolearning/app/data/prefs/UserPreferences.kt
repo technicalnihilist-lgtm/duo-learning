@@ -119,7 +119,12 @@ class UserPreferences(private val context: Context) {
     suspend fun setBouncePct(v: Float) = edit { it[Keys.bounce] = v.coerceIn(0f, 200f) }
     suspend fun setSpeedPct(v: Float) = edit { it[Keys.speed] = v.coerceIn(50f, 200f) }
 
-    /** Restore every visual effect to its default. */
+    /**
+     * Restore every visual effect to its default. This covers the switches and
+     * sliders on the Settings screen as well as the ones in the effects sheet:
+     * depth, parallax and effect strength used to survive a reset, so the sheet
+     * claimed to reset everything while the home screen kept tilting.
+     */
     suspend fun resetEffects() = edit {
         it[Keys.glass] = true
         it[Keys.anims] = true
@@ -128,6 +133,9 @@ class UserPreferences(private val context: Context) {
         it[Keys.depthPct] = 100f
         it[Keys.bounce] = 100f
         it[Keys.speed] = 100f
+        it[Keys.depth] = true
+        it[Keys.parallax] = true
+        it[Keys.strength] = 0.6f
     }
     suspend fun setOnboarded(done: Boolean) = edit { it[Keys.onboarded] = done }
 
