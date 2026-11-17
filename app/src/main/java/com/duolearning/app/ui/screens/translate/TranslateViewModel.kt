@@ -116,12 +116,22 @@ class TranslateViewModel(
 
     fun swap() {
         invalidatePending()
-        _state.update {
-            val newSource = it.target
-            val newTarget = if (it.source == "auto") (it.detected ?: "en") else it.source
-            it.copy(
+        _state.update { s ->
+            val newSource = s.target
+            val detected = s.detected
+            // Swapping with the source on "auto" and nothing detected yet left
+            // the target as a blind "en", which for an English target produced
+            // source == target and made every following Translate fail with
+            // "source and target languages are the same".
+            val newTarget = when {
+                s.source != "auto" -> s.source
+                detected != null && detected != newSource -> detected
+                newSource == "en" -> "hi"
+                else -> "en"
+            }
+            s.copy(
                 source = newSource, target = newTarget,
-                text = it.resultText ?: it.text,
+                text = s.resultText ?: s.text,
                 result = null, detected = null, savedJustNow = false, loading = false
             )
         }
@@ -134,10 +144,21 @@ class TranslateViewModel(
         }
     }
 
+    /**
+     * Append pasted text. A separator is added when neither side already has
+     * one, so pasting after typed text no longer glues the words together
+     * ("hola" + "amigo" used to become "holaamigo").
+     */
     fun append(text: String) {
         invalidatePending()
-        _state.update {
-            it.copy(text = it.text + text, result = null, detected = null, savedJustNow = false, loading = false)
+        _state.update { s ->
+            val needsSpace = s.text.isNotEmpty() &&
+                !s.text.last().isWhitespace() &&
+                text.firstOrNull()?.isWhitespace() != true
+            s.copy(
+                text = s.text + (if (needsSpace) " " else "") + text,
+                result = null, detected = null, savedJustNow = false, loading = false
+            )
         }
     }
 
