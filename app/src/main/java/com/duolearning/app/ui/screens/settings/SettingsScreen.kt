@@ -58,6 +58,7 @@ fun SettingsScreen(
 ) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     var showReset by remember { mutableStateOf(false) }
+    var showClearHistory by remember { mutableStateOf(false) }
 
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -192,7 +193,10 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodyMedium, color = DuoGrey
                 )
                 Spacer(Modifier.height(10.dp))
-                OutlinedButton(onClick = { vm.clearHistory() }, shape = RoundedCornerShape(12.dp)) {
+                // One tap used to wipe every history row with no warning and
+                // no confirmation, unlike "Reset all progress" right below it.
+                OutlinedButton(onClick = { showClearHistory = true },
+                    shape = RoundedCornerShape(12.dp)) {
                     Text("Clear translation history", color = MaterialTheme.colorScheme.onBackground)
                 }
             }
@@ -232,6 +236,28 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showReset = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (showClearHistory) {
+        AlertDialog(
+            onDismissRequest = { showClearHistory = false },
+            title = { Text("Clear translation history?") },
+            text = {
+                Text(
+                    "This deletes the recent translations list. Saved translations " +
+                        "and your learning progress are kept."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.clearHistory()
+                    showClearHistory = false
+                }) { Text("Clear", color = DuoRed) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearHistory = false }) { Text("Cancel") }
             }
         )
     }
