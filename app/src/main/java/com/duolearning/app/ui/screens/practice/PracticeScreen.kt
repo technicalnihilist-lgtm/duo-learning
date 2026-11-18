@@ -162,8 +162,11 @@ private fun PracticeSession(state: PracticeUiState, vm: PracticeViewModel) {
                     }
                 } else if (card.hint.isNotBlank()) {
                     Spacer(Modifier.height(12.dp))
+                    // The example used to be drawn in DuoSurfaceHigh (#1C1C27)
+                    // on a DuoSurface card (#14141C), so before the answer was
+                    // revealed the hint was effectively invisible.
                     Text(card.hint, style = MaterialTheme.typography.bodyMedium,
-                        color = DuoSurfaceHigh, textAlign = TextAlign.Center)
+                        color = DuoGrey.copy(alpha = 0.8f), textAlign = TextAlign.Center)
                 }
             }
         }
