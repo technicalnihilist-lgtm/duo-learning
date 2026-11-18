@@ -1,6 +1,7 @@
 package com.duolearning.app.ui.screens.translate
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -123,7 +124,14 @@ fun TranslateScreen(
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = {
-                    clipboard.getText()?.text?.let { vm.append(it) }
+                    // An empty clipboard used to look like a broken button:
+                    // nothing changed and nothing said why.
+                    val pasted = clipboard.getText()?.text
+                    if (pasted.isNullOrBlank()) {
+                        Toast.makeText(context, "Clipboard is empty", Toast.LENGTH_SHORT).show()
+                    } else {
+                        vm.append(pasted)
+                    }
                 }, shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1f)) {
                     Text("Paste", color = MaterialTheme.colorScheme.onBackground)
                 }
@@ -178,7 +186,13 @@ fun TranslateScreen(
                                 type = "text/plain"
                                 putExtra(Intent.EXTRA_TEXT, result)
                             }
-                            context.startActivity(Intent.createChooser(send, "Share translation"))
+                            // A device with no app that handles text would
+                            // throw out of the click handler and close the app.
+                            runCatching {
+                                context.startActivity(Intent.createChooser(send, "Share translation"))
+                            }.onFailure {
+                                Toast.makeText(context, "No app can share text", Toast.LENGTH_SHORT).show()
+                            }
                         }) { Icon(Icons.Filled.Share, "Share", tint = DuoGrey) }
                         Spacer(Modifier.weight(1f))
                         OutlinedButton(onClick = { vm.saveCurrent() }, shape = RoundedCornerShape(12.dp)) {
