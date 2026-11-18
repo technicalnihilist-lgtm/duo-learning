@@ -5,7 +5,7 @@
 - Android Studio **Ladybug (2024.2)** or newer, **or** a command-line Android SDK with
   JDK 17 and Gradle 8.7+.
 - Android SDK Platform 34 and Build-Tools 34.
-- A device or emulator running Android 7.0 (API 24) or newer.
+- A device or emulator running Android 8.0 (API 26) or newer (`minSdk` is 26).
 
 ## Building in Android Studio (recommended)
 

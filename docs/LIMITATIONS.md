@@ -36,8 +36,9 @@ free, offline, on-device engine.
 
 ## Platform
 
-- **minSdk 24.** `java.time` is used via core-library desugaring, which is enabled in the
-  build.
+- **minSdk 26 (Android 8.0).** `java.time` is available natively from API 26, so no
+  core-library desugaring is enabled in the build (`app/build.gradle.kts`). Devices on
+  Android 7.0 or older cannot install the APK.
 - **No cloud sync.** Progress lives on the device (with Android's standard backup). There
   is no account, so there is nothing to sync across devices.
 - **No iOS/desktop.** Android only, as specified.
