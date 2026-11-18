@@ -189,6 +189,10 @@ fun TranslateScreen(
                         Spacer(Modifier.height(6.dp))
                         Tag("Saved to vocabulary", DuoGreen)
                     }
+                    state.saveError?.let { message ->
+                        Spacer(Modifier.height(6.dp))
+                        Text(message, color = DuoRed, style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
             }
             item {

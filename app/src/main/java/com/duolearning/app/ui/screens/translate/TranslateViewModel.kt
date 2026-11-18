@@ -27,7 +27,9 @@ data class TranslateUiState(
     val result: TranslationResult? = null,
     val loading: Boolean = false,
     val detected: String? = null,
-    val savedJustNow: Boolean = false
+    val savedJustNow: Boolean = false,
+    /** Set when saving the current translation to the database failed. */
+    val saveError: String? = null
 ) {
     val resultText: String? get() = (result as? TranslationResult.Success)?.text
     val errorText: String? get() = (result as? TranslationResult.Failure)?.message
@@ -172,7 +174,9 @@ class TranslateViewModel(
         if (s.text.isBlank()) return
         invalidatePending()
         val id = requestId
-        _state.update { it.copy(loading = true, result = null, savedJustNow = false) }
+        _state.update {
+            it.copy(loading = true, result = null, savedJustNow = false, saveError = null)
+        }
         translateJob = viewModelScope.launch {
             try {
                 if (s.source == "auto") {
@@ -203,17 +207,34 @@ class TranslateViewModel(
         }
     }
 
-    /** Save the current successful translation to the vocabulary list. */
+    /**
+     * Save the current successful translation to the vocabulary list.
+     *
+     * The write used to run without a guard: a database failure escaped the
+     * coroutine and took the app down, and the "Saved to vocabulary" tag was
+     * shown even when nothing had been written. Report the failure instead.
+     */
     fun saveCurrent() = viewModelScope.launch {
         val s = _state.value
         val text = s.resultText ?: return@launch
-        translation.saveTranslation(
-            source = if (s.source == "auto") (s.detected ?: "auto") else s.source,
-            target = s.target,
-            sourceText = s.text,
-            targetText = text
-        )
-        _state.update { it.copy(savedJustNow = true) }
+        try {
+            translation.saveTranslation(
+                source = if (s.source == "auto") (s.detected ?: "auto") else s.source,
+                target = s.target,
+                sourceText = s.text,
+                targetText = text
+            )
+            _state.update { it.copy(savedJustNow = true, saveError = null) }
+        } catch (c: CancellationException) {
+            throw c
+        } catch (t: Throwable) {
+            _state.update {
+                it.copy(
+                    savedJustNow = false,
+                    saveError = "Couldn't save this translation. Try again."
+                )
+            }
+        }
     }
 
     fun deleteSaved(id: Long) = viewModelScope.launch { translation.deleteSaved(id) }
