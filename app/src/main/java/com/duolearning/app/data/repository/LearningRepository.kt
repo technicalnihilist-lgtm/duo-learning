@@ -143,23 +143,29 @@ class LearningRepository(
         else correct * Xp.PER_CORRECT_ANSWER + Xp.PRACTICE_SESSION_BONUS
         val passed = Xp.passed(correct, total)
 
+        // Only a lesson that becomes complete for the first time counts towards
+        // the day's lesson total. Re-playing a finished lesson is revision, and
+        // it used to add another "lesson completed" to the day every time.
+        var newlyCompleted = false
         if (lessonId != null) {
             val existing = db.lessonProgressDao().byId(lessonId)
             val score = if (total > 0) (correct * 100) / total else 0
+            val wasCompleted = existing?.completed == true
             db.lessonProgressDao().upsert(
                 LessonProgressEntity(
                     lessonId = lessonId,
                     courseCode = courseCode,
-                    completed = existing?.completed == true || passed,
+                    completed = wasCompleted || passed,
                     bestScore = maxOf(existing?.bestScore ?: 0, score),
                     attempts = (existing?.attempts ?: 0) + 1,
                     lastAttemptAt = System.currentTimeMillis()
                 )
             )
+            newlyCompleted = passed && !wasCompleted
         }
         return awardActivity(
             xp = xp,
-            lessonsDelta = if (lessonId != null && passed) 1 else 0,
+            lessonsDelta = if (newlyCompleted) 1 else 0,
             qualifying = qualifying,
             passed = passed
         )
