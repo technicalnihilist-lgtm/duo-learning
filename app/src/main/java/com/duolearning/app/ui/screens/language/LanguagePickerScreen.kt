@@ -38,6 +38,7 @@ import com.duolearning.app.data.model.Language
 import com.duolearning.app.ui.LocalContainer
 import com.duolearning.app.ui.components.Tag
 import com.duolearning.app.ui.theme.DuoBlue
+import com.duolearning.app.ui.theme.DuoBorder
 import com.duolearning.app.ui.theme.DuoGreen
 import com.duolearning.app.ui.theme.DuoGrey
 import com.duolearning.app.ui.theme.DuoPurple
@@ -135,11 +136,15 @@ fun LanguagePickerScreen(
         items(all, key = { it.code }) { lang ->
             val enabled = selectable(lang)
             Row(
+                // Both branches of this border used to be DuoSurfaceHigh, so
+                // an unselectable language looked exactly like a selectable one
+                // apart from its text colour. Give the disabled rows a dashed-
+                // feeling dim edge and a muted background instead.
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
-                    .background(if (enabled) DuoSurface else DuoSurfaceHigh)
+                    .background(if (enabled) DuoSurface else DuoSurfaceHigh.copy(alpha = 0.4f))
                     .border(
                         1.dp,
-                        if (enabled) DuoSurfaceHigh else DuoSurfaceHigh,
+                        if (enabled) DuoSurfaceHigh else DuoBorder,
                         RoundedCornerShape(14.dp)
                     )
                     .clickable(enabled = enabled) {
