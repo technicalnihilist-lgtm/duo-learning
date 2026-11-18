@@ -7,7 +7,16 @@ package com.duolearning.app.domain
  */
 object AnswerValidator {
 
-    private val punctuation = Regex("[^\\p{L}\\p{N}\\s]")
+    /**
+     * Everything that is not a letter, a digit, whitespace or a combining
+     * mark.
+     *
+     * Combining marks (`\p{M}`) have to survive normalisation: Indic scripts
+     * write their vowels as separate combining characters (की, का, हूँ), and
+     * dropping every non-letter deleted them. "काल" and "कल" both collapsed
+     * to "कल", so a wrong answer with the right consonants was graded correct.
+     */
+    private val punctuation = Regex("[^\\p{L}\\p{N}\\p{M}\\s]")
     private val whitespace = Regex("\\s+")
 
     fun normalize(input: String): String = input
