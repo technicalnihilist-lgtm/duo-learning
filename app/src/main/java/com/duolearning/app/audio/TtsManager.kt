@@ -53,8 +53,16 @@ class TtsManager(context: Context) {
             engine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String?) { _speaking.value = true }
                 override fun onDone(utteranceId: String?) { _speaking.value = false }
+                // QUEUE_FLUSH (used by every speak() call) stops the utterance
+                // that is playing, and a stopped utterance reports onStop - not
+                // onDone. Without this the flag stayed true for good after a
+                // second tap, so anything watching it never saw the engine idle.
+                override fun onStop(utteranceId: String?, interrupted: Boolean) {
+                    _speaking.value = false
+                }
                 @Deprecated("Deprecated in Java")
                 override fun onError(utteranceId: String?) { _speaking.value = false }
+                override fun onError(utteranceId: String?, errorCode: Int) { _speaking.value = false }
             })
         }
     }
