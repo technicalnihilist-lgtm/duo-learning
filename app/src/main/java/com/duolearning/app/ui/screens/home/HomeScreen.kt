@@ -167,7 +167,15 @@ fun HomeScreen(
             item {
                 GlassCard(Modifier.fillMaxWidth()) {
                     WeeklyActivity(
-                        labels = state.weekLabels.ifEmpty { Dates.shortWeekdays },
+                        // Before the first emission the labels fell back to
+                        // Monday-first initials while todayIndex is 6, so the
+                        // highlighted circle pointed at the wrong day on the
+                        // first frame. Build the same rolling week the state
+                        // does instead.
+                        labels = state.weekLabels.ifEmpty {
+                            val today = Dates.todayEpochDay()
+                            (6 downTo 0).map { back -> Dates.shortWeekday(today - back) }
+                        },
                         done = state.weekDone.ifEmpty { List(7) { false } },
                         todayIndex = state.todayIndex
                     )
